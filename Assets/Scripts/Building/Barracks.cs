@@ -1,13 +1,32 @@
 using UnityEngine;
-using  System.Collections.Generic;
+using System.Collections.Generic;
+using System;
+
+// Define the event arguments for flag position change
+public class FlagPositionChangedEventArgs : EventArgs
+{
+    public Vector2 NewPosition { get; private set; }
+    public Vector2[] FormationOffsets { get; private set; }
+    
+    public FlagPositionChangedEventArgs(Vector2 newPosition, Vector2[] formationOffsets)
+    {
+        NewPosition = newPosition;
+        FormationOffsets = formationOffsets;
+    }
+}
 
 public class Barracks : BaseTower
 {
+    // Event that soldiers can subscribe to
+    public event Action<Vector2> OnFlagPositionChanged;
+    
     [Header("Barracks Settings")]
     [SerializeField] private int maxSoldiers = 3;
     [SerializeField] private float spawnTime = 5f;
     [SerializeField] private GameObject flagPrefab;
     [SerializeField] private TowerSO towerData;
+    
+    public Soldier[] Soldiers = new Soldier[3];
 
     private int soldierCount = 0;
     private float spawnTimer = 0f;
@@ -23,8 +42,7 @@ public class Barracks : BaseTower
         new Vector2(0.6f, -0.365f),
     };
     
-    // References to spawned soldiers
-    private List<Soldier> spawnedSoldiers = new List<Soldier>();
+  
 
     protected override void Start()
     {
@@ -47,7 +65,7 @@ public class Barracks : BaseTower
         // Apply tower data settings
         if (towerData != null)
         {
-           ;
+           
         }
     }
 
@@ -81,8 +99,6 @@ public class Barracks : BaseTower
     protected override void Update()
     {
         base.Update();
-        
-        // Handle soldier spawning logic
         if (soldierCount < maxSoldiers && isSpawning)
         {
             spawnTimer += Time.deltaTime;
@@ -93,16 +109,12 @@ public class Barracks : BaseTower
                 SpawnSoldier();
             }
         }
-        
-        // Check for dead soldiers and update count
         UpdateSoldierCount();
     }
 
     private void UpdateSoldierCount()
     {
-        // Remove null references (destroyed soldiers)
-        spawnedSoldiers.RemoveAll(s => s == null);
-        soldierCount = spawnedSoldiers.Count;
+        
     }
 
     private void SpawnSoldier()
@@ -116,24 +128,14 @@ public class Barracks : BaseTower
         if (soldierCount >= maxSoldiers)
             return;
 
-        // Calculate spawn position using the appropriate offset
-        Vector2 spawnPosition = transform.position + (Vector3)triangleOffsets[soldierCount % triangleOffsets.Length];
-        
-        // Spawn the soldier
+        int formationIndex = soldierCount % triangleOffsets.Length;
+        Vector2 spawnPosition = flagPosition + triangleOffsets[formationIndex];
         GameObject soldierObj = Instantiate(towerData.soldierPrefab, spawnPosition, Quaternion.identity);
         Soldier soldier = soldierObj.GetComponent<Soldier>();
-        
-        if (soldier != null)
-        {
-            spawnedSoldiers.Add(soldier);
-            soldierCount++;
-            
-            Debug.Log($"Spawned soldier {soldierCount} at position {spawnPosition}");
-        }
-    }
-
-    public override void Attack()
-    {
+        Soldiers[soldierCount] = soldier;
+        soldier.SetFormationIndex(formationIndex);
+        soldier.InitializeWithFlagPosition(flagPosition, triangleOffsets[formationIndex],this);
+        soldierCount++;
     }
 
     public override void Upgrade()
@@ -148,21 +150,6 @@ public class Barracks : BaseTower
 
     public override void Sell()
     {
-        // Destroy all spawned soldiers
-        foreach (Soldier soldier in spawnedSoldiers)
-        {
-            if (soldier != null)
-            {
-                Destroy(soldier.gameObject);
-            }
-        }
-        
-        // Destroy flag visual
-        if (flagVisual != null)
-        {
-            Destroy(flagVisual);
-        }
-        
         base.Sell();
     }
 
@@ -171,19 +158,14 @@ public class Barracks : BaseTower
         flagPosition = newPosition;
         if (flagVisual != null)
         {
-            flagVisual.transform.position = flagPosition;
+            flagVisual.transform.position = newPosition;
         }
-        
-        foreach (Soldier soldier in spawnedSoldiers)
-        {
-            if (soldier != null)
-            {
-            }
-        }
+        OnFlagPositionChanged?.Invoke(newPosition);
     }
     
     public void OnFlagPlaced(Vector2 position)
     {
+        Debug.Log("Flag placed at: " + position);
         ChangeFlagPosition(position);
     }
 }

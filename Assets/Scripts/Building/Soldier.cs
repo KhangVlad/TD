@@ -14,16 +14,15 @@ public class IdleState : ISoldierState
 {
     public void EnterState(Soldier soldier)
     {
-        Debug.Log("Soldier entered Idle state.");
     }
 
     public void UpdateState(Soldier soldier)
     {
+        // Check for enemies in detection range
     }
 
     public void ExitState(Soldier soldier)
     {
-        Debug.Log("Soldier exiting Idle state.");
     }
 }
 
@@ -31,7 +30,6 @@ public class MovingState : ISoldierState
 {
     public void EnterState(Soldier soldier)
     {
-        Debug.Log("Soldier entered Moving state.");
     }
 
     public void UpdateState(Soldier soldier)
@@ -52,7 +50,6 @@ public class MovingState : ISoldierState
 
     public void ExitState(Soldier soldier)
     {
-        Debug.Log("Soldier exiting Moving state.");
     }
 }
 
@@ -61,7 +58,6 @@ public class AttackState : ISoldierState
 {
     public void EnterState(Soldier soldier)
     {
-        Debug.Log("Soldier entered Attack state.");
     }
 
     public void UpdateState(Soldier soldier)
@@ -81,17 +77,49 @@ public class Soldier : MonoBehaviour
     private ISoldierState currentState;
     public Vector2 TargetPosition { get; private set; }
     public float MovementSpeed { get; private set; } = 2f;
-    public float DetechRange  { get; private set; } = 1f; //us
+    public float DetectionRange { get; private set; } = 1f;
+    
+    private int formationIndex = 0;
+    private bool isInitialized = false;
+    
+    private Vector2 offsetWithFlag;
 
     private void Start()
     {
         ChangeState(new IdleState());
+     
+    }
+    
+    public void InitializeWithFlagPosition(Vector2 flagPosition, Vector2 offset, Barracks b)
+    {
+        offsetWithFlag = offset;
+        isInitialized = true;
+        Vector2 targetPos = flagPosition + offset;
+        
+        TargetPosition = targetPos;
+        
+        // If the flag is not at the current position, move there
+        if (Vector2.Distance(transform.position, targetPos) > 0.1f)
+        {
+            ChangeState(new MovingState());
+        }
+        b.OnFlagPositionChanged += OnFlagPositionChanged;
+    }
+    
+    private void OnDestroy()
+    {
+     
     }
 
     private void Update()
     {
         currentState?.UpdateState(this);
-    }   
+    }
+    
+    public void SetFormationIndex(int index)
+    {
+        formationIndex = index;
+    }
 
     public void ChangeState(ISoldierState newState)
     {
@@ -110,11 +138,20 @@ public class Soldier : MonoBehaviour
     {
         ChangeState(new AttackState());
     }
+    
+    // Event handler for when flag position changes
+    private void OnFlagPositionChanged(Vector2 newFlagPos)
+    {
+        // Calculate this soldier's target position based on their formation index
+        Vector2 targetPos = newFlagPos + offsetWithFlag;
+        
+        // Move to the new position
+        SetTargetPosition(targetPos);
+    }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, DetechRange);
-   
+        Gizmos.DrawWireSphere(transform.position, DetectionRange);
     }
 }

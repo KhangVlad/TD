@@ -5,7 +5,6 @@ using UnityEngine.UI;
 public class UIGamePlayManager : MonoBehaviour
 {
     public static UIGamePlayManager Instance { get; private set; }
-
     public RectTransform uiCircleSelection;
     public Canvas canvas;
     public Animator circleSelectionAnimator;
@@ -13,13 +12,13 @@ public class UIGamePlayManager : MonoBehaviour
     [SerializeField] private UIBuidingSlot _uiBuidingSlotPrefab;
     [SerializeField] private Transform _uiBuildingSlotParent;
     [SerializeField] private Button flagBtn;
+    [SerializeField] private GameObject flagPrefab;
 
     public bool IsActiveFlag = false;
-    public List<UIBuidingSlot> _buildingSlotPool = new List<UIBuidingSlot>();
     private Vector2 _mousePos;
 
     private BuildSpot _currentSelected;
-    private BaseTower _currentTower;
+    public BaseTower _currentTower;
 
     private void Awake()
     {
@@ -83,21 +82,20 @@ public class UIGamePlayManager : MonoBehaviour
         {
             uiCircleSelection?.gameObject.SetActive(false);
             _currentSelected = null;
-            _currentTower = null;
+            // _currentTower = null;
             return;
         }
 
         if (hit.collider.TryGetComponent<BuildSpot>(out BuildSpot buildingSpot))
         {
             _currentSelected = buildingSpot;
-            _currentTower = null;
+            // _currentTower = null;
             OnBuildingSpotClicked(buildingSpot);
         }
 
         if (hit.collider.TryGetComponent<BaseTower>(out BaseTower tower))
         {
             _currentTower = tower;
-            _currentSelected = null;
             InitializeUpgradableSlots(tower.dataSO);
         }
     }
@@ -126,51 +124,39 @@ public class UIGamePlayManager : MonoBehaviour
     {
         HideAllSlots();
         List<TowerSO> nextLevelTowers = GameDataManager.Instance.GetPossibleUpgrade(so);
-        if (nextLevelTowers.Count == 0) return;
-
         uiCircleSelection.gameObject.SetActive(true);
         float radius = 100f;
         float angleStep = 360f / nextLevelTowers.Count;
 
         for (int i = 0; i < nextLevelTowers.Count; i++)
         {
-            UIBuidingSlot slot = GetBuildingSlot();
+            UIBuidingSlot slot = Instantiate(_uiBuidingSlotPrefab, _uiBuildingSlotParent);
             slot.transform.SetParent(_uiBuildingSlotParent, false);
             slot.Initialize(nextLevelTowers[i]);
 
             slot.OnUpgrade += (data) =>
             {
-                UpgradeTower(_currentTower, data);
+                CreateBuilding(data);
+                Destroy(_currentTower.gameObject);
                 uiCircleSelection.gameObject.SetActive(false);
             };
-
             float angle = i * angleStep * Mathf.Deg2Rad;
             float x = Mathf.Cos(angle) * radius;
             float y = Mathf.Sin(angle) * radius;
             slot.transform.localPosition = new Vector3(x, y, 0);
         }
-
         AppearCircle(_currentTower.transform.position);
     }
 
     private void CreateBuilding(TowerSO towerData)
     {
-        if (_currentSelected == null || towerData == null || towerData.prefab == null)
-        {
-            Debug.LogError("Cannot create tower: missing build spot or tower data");
-            return;
-        }
-
-        // Check if player has enough resources
+       
         if (!GameDataManager.Instance.CanAfford(towerData.buildCost))
         {
             Debug.Log("Not enough resources to build " + towerData.towerName);
             return;
         }
-
         GameObject towerObj = Instantiate(towerData.prefab, _currentSelected.transform.position, Quaternion.identity);
-
-        // Initialize the tower with the data
         BaseTower tower = towerObj.GetComponent<BaseTower>();
         if (tower != null)
         {
@@ -190,50 +176,6 @@ public class UIGamePlayManager : MonoBehaviour
         }
     }
 
-    private void UpgradeTower(BaseTower tower, TowerSO upgradeData)
-    {
-        if (tower == null || upgradeData == null)
-        {
-            Debug.LogError("Cannot upgrade tower: missing tower or upgrade data");
-            return;
-        }
-
-        // Check if player has enough resources
-        if (!GameDataManager.Instance.CanAfford(upgradeData.upgradeCost))
-        {
-            Debug.Log("Not enough resources to upgrade to " + upgradeData.towerName);
-            return;
-        }
-
-
-        Vector3 position = tower.transform.position;
-
-        // Destroy the old tower
-        Destroy(tower.gameObject);
-
-        // Instantiate the upgraded tower
-        GameObject upgradedTowerObj = Instantiate(upgradeData.prefab, position, Quaternion.identity);
-
-        // Initialize with the upgraded data
-        BaseTower upgradedTower = upgradedTowerObj.GetComponent<BaseTower>();
-        if (upgradedTower != null)
-        {
-            upgradedTower.dataSO = upgradeData;
-
-            // Special handling for Barracks tower
-            if (upgradedTower is Barracks barracks)
-            {
-                barracks.InitializeTower(upgradeData);
-            }
-
-            Debug.Log($"Upgraded to {upgradeData.towerName} tower at {position}");
-        }
-        else
-        {
-            Debug.LogError($"Upgraded tower prefab {upgradeData.prefab.name} does not have a BaseTower component");
-            Destroy(upgradedTowerObj);
-        }
-    }
 
     private void HideAllSlots()
     {
@@ -243,21 +185,7 @@ public class UIGamePlayManager : MonoBehaviour
         }
     }
 
-    private UIBuidingSlot GetBuildingSlot()
-    {
-        foreach (var slot in _buildingSlotPool)
-        {
-            if (!slot.gameObject.activeSelf)
-            {
-                slot.gameObject.SetActive(true);
-                return slot;
-            }
-        }
-
-        UIBuidingSlot newSlot = Instantiate(_uiBuidingSlotPrefab, _uiBuildingSlotParent);
-        _buildingSlotPool.Add(newSlot);
-        return newSlot;
-    }
+  
 
     private void InitializeAllBaseTowers()
     {
@@ -269,7 +197,7 @@ public class UIGamePlayManager : MonoBehaviour
         for (int i = 0; i < baseTowers.Count; i++)
         {
             TowerSO towerSO = baseTowers[i];
-            UIBuidingSlot slot = GetBuildingSlot();
+            UIBuidingSlot slot = Instantiate( _uiBuidingSlotPrefab , _uiBuildingSlotParent);
             slot.transform.SetParent(_uiBuildingSlotParent, false);
             slot.Initialize(towerSO);
 
