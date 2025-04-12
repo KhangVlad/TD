@@ -19,6 +19,7 @@ public class UIBuidingSlot : MonoBehaviour
     private void OnDestroy()
     {
         upgradeButton.onClick.RemoveListener(OnUpgradeButtonClick);
+        
     }
 
     private void OnUpgradeButtonClick()
@@ -30,7 +31,7 @@ public class UIBuidingSlot : MonoBehaviour
     public void Initialize(TowerSO so)
     {
         towerSO = so;
-        towerImage.sprite = so.sprite;
-        cost.text = so.cost.ToString();
+        towerImage.sprite = so.icon;
+        cost.text = so.buildCost.ToString();
     }
 }

@@ -39,32 +39,23 @@ public class GameDataManager : MonoBehaviour
         return monsterSOList[0];
     }
 
-    public List<TowerSO> GetNextLevelTowers(TowerType t, int currentLv)
+    public List<TowerSO> GetPossibleUpgrade(TowerSO tow)
     {
-        List<TowerSO> nextTowers = new List<TowerSO>();
-        if (t == TowerType.None)
+        List<TowerSO> possibleUpgrades = new List<TowerSO>();
+        for (int i = 0; i < tow.possibleUpgrades.Count; i++)
         {
             foreach (TowerSO towerSO in towerSOList)
             {
-                if (towerSO.level == 1)
+                if (towerSO.type == tow.possibleUpgrades[i])
                 {
-                    nextTowers.Add(towerSO);
-                }
-            }
-        }
-        else
-        {
-            foreach (TowerSO towerSO in towerSOList)
-            {
-                if (towerSO.type == t && towerSO.level == currentLv + 1)
-                {
-                    nextTowers.Add(towerSO);
+                    possibleUpgrades.Add(towerSO);
                 }
             }
         }
 
-        return nextTowers;
+        return possibleUpgrades;
     }
+
 
     public List<TowerSO> GetAllBaseTowers()
     {
@@ -78,5 +69,10 @@ public class GameDataManager : MonoBehaviour
         }
 
         return baseTowers;
+    }
+
+    public bool CanAfford(float cost)
+    {
+        return true;
     }
 }
