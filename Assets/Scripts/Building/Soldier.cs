@@ -173,12 +173,7 @@ public class Soldier : MonoBehaviour
         SetTargetPosition(targetPos);
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, 1.2f);
-    }
-
+  
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Enemy"))
