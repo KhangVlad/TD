@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Monster
   m_EditorClassIdentifier: 
   sprite: {fileID: -1577746839068193429, guid: 2f2ce15754b174476b3a1c0d75b703b1, type: 3}
+  type: 0
   health: 100
   damage: 3
-  speed: 3
+  speed: 1.5

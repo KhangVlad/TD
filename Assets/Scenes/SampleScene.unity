@@ -440,6 +440,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Prototype_Building (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 4639787434815345471, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -547,7 +551,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &657723562
 RectTransform:
   m_ObjectHideFlags: 0
@@ -931,8 +935,66 @@ MonoBehaviour:
   _uiBuidingSlotPrefab: {fileID: 3715146047647443528, guid: 17553e2f67e29408a85a9e07e3fb41aa, type: 3}
   _uiBuildingSlotParent: {fileID: 1324534827}
   flagBtn: {fileID: 1591663585}
+  flagPrefab: {fileID: 4244005603585195159, guid: f7a3f72a3f75a4fc1a6b263f9b751563, type: 3}
+  buildingLayer:
+    serializedVersion: 2
+    m_Bits: 256
   IsActiveFlag: 0
   _buildingSlotPool: []
+--- !u!1 &1071518358
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1071518360}
+  - component: {fileID: 1071518359}
+  m_Layer: 0
+  m_Name: monsterManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1071518359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071518358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 981f70efa0b54de29cf35240e0f6859c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainPath:
+  - {fileID: 678449946}
+  - {fileID: 2105309085}
+  - {fileID: 354625309}
+  - {fileID: 784078869}
+  - {fileID: 1617063973}
+  - {fileID: 668593603}
+  - {fileID: 789743315}
+  - {fileID: 1605514314}
+  monsterPrefab: {fileID: 2669970522930166874, guid: 34eb5fa5092bb473d9df782867bbeb5f, type: 3}
+--- !u!4 &1071518360
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071518358}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.19591136, y: 0.79058796, z: -0.025033565}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1094250056
 GameObject:
   m_ObjectHideFlags: 0
@@ -1028,6 +1090,10 @@ PrefabInstance:
     - target: {fileID: 4639787434815345471, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
       propertyPath: m_Name
       value: Prototype_Building (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4639787434815345471, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1550,6 +1616,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Prototype_Building (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 4639787434815345471, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1691,6 +1761,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Prototype_Building
       objectReference: {fileID: 0}
+    - target: {fileID: 4639787434815345471, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1713,3 +1787,4 @@ SceneRoots:
   - {fileID: 1715311442}
   - {fileID: 1927658017}
   - {fileID: 1094250058}
+  - {fileID: 1071518360}

@@ -19,6 +19,7 @@ public class UIBuidingSlot : MonoBehaviour
     private void OnDestroy()
     {
         upgradeButton.onClick.RemoveListener(OnUpgradeButtonClick);
+        OnUpgrade = null;
         
     }
 

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3142592339310212365}
   - component: {fileID: 4528853416754597201}
   - component: {fileID: 4801498301398851809}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Barrack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -103,7 +103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dataSO: {fileID: 0}
   maxSoldiers: 3
-  spawnTime: 5
+  spawnTime: 2
   flagPrefab: {fileID: 0}
   towerData: {fileID: 0}
 --- !u!61 &4801498301398851809

@@ -20,7 +20,6 @@ public abstract class BaseTower : MonoBehaviour, ITower
 
     protected virtual void Start()
     {
-        InvokeRepeating("FindTarget", 0f, 0.5f);
     }
 
     protected virtual void Update()
@@ -53,12 +52,6 @@ public abstract class BaseTower : MonoBehaviour, ITower
         parentSpot = spot;
     }
 
-    protected virtual void OnDrawGizmosSelected()
-    {
-        // Draw attack range in editor
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, 2f);
-    }
 }
 
 

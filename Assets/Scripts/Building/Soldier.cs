@@ -18,7 +18,10 @@ public class IdleState : ISoldierState
 
     public void UpdateState(Soldier soldier)
     {
-        // Check for enemies in detection range
+        if (soldier.monsterTarget is not null)
+        {
+            soldier.ChangeState(soldier.movingState);
+        }
     }
 
     public void ExitState(Soldier soldier)
@@ -30,21 +33,57 @@ public class MovingState : ISoldierState
 {
     public void EnterState(Soldier soldier)
     {
+        
+        
     }
 
     public void UpdateState(Soldier soldier)
     {
-        // Move towards the target position
+        if(soldier.monsterTarget is not null)
+        {
+    
+            soldier.transform.position = Vector2.MoveTowards(
+                soldier.transform.position,
+                soldier.monsterTarget.transform.position,
+                soldier.MovementSpeed * Time.deltaTime
+            );
+
+            if (Vector2.Distance(soldier.transform.position, soldier.monsterTarget.transform.position) <= soldier.attackRange)
+            {
+                soldier.ChangeState(soldier.attackState);
+            }
+            
+            
+        }
+        else
+        {
+            soldier.ChangeState(soldier.idleState);
+        }
+    }
+
+    public void ExitState(Soldier soldier)
+    {
+    }
+}
+
+public class MovingFlagState : ISoldierState
+{
+    public void EnterState(Soldier soldier)
+    {
+    }
+
+    public void UpdateState(Soldier soldier)
+    {
+        // Move towards the flag position
         soldier.transform.position = Vector2.MoveTowards(
             soldier.transform.position,
             soldier.TargetPosition,
             soldier.MovementSpeed * Time.deltaTime
         );
 
-        // Check if the soldier has reached the target
-        if (Vector2.Distance(soldier.transform.position, soldier.TargetPosition) <= 0.1f)
+        if (Vector2.Distance(soldier.transform.position, soldier.TargetPosition) <= soldier.attackRange)
         {
-            soldier.ChangeState(new IdleState());
+            soldier.ChangeState(soldier.idleState);
         }
     }
 
@@ -62,96 +101,118 @@ public class AttackState : ISoldierState
 
     public void UpdateState(Soldier soldier)
     {
-        // Attack behavior (e.g., deal damage to a target)
     }
 
     public void ExitState(Soldier soldier)
     {
-        Debug.Log("Soldier exiting Attack state.");
     }
 }
 
-// Soldier class with state management
-public class Soldier : MonoBehaviour
+public class Soldier : MonoBehaviour 
 {
     private ISoldierState currentState;
+    public Monster monsterTarget;
     public Vector2 TargetPosition { get; private set; }
-    public float MovementSpeed { get; private set; } = 2f;
-    public float DetectionRange { get; private set; } = 1f;
     
-    private int formationIndex = 0;
-    private bool isInitialized = false;
+    public float attackRange { get; set; }
     
+    public float MovementSpeed { get; set; } = 2f;
+    public SoldierState State;
     private Vector2 offsetWithFlag;
+    public IdleState idleState;
+    public MovingState movingState;
+    public AttackState attackState;
+    public MovingFlagState movingFlagState;
 
-    private void Start()
+    private void Awake()
     {
-        ChangeState(new IdleState());
-     
+        idleState = new IdleState();
+        movingState = new MovingState();
+        attackState = new AttackState();
+        movingFlagState = new MovingFlagState();
     }
+    
+   
     
     public void InitializeWithFlagPosition(Vector2 flagPosition, Vector2 offset, Barracks b)
     {
         offsetWithFlag = offset;
-        isInitialized = true;
+        attackRange = 0.2f;
         Vector2 targetPos = flagPosition + offset;
-        
         TargetPosition = targetPos;
-        
-        // If the flag is not at the current position, move there
-        if (Vector2.Distance(transform.position, targetPos) > 0.1f)
-        {
-            ChangeState(new MovingState());
-        }
+        ChangeState(movingFlagState);
         b.OnFlagPositionChanged += OnFlagPositionChanged;
     }
     
-    private void OnDestroy()
-    {
-     
-    }
-
+ 
     private void Update()
     {
         currentState?.UpdateState(this);
     }
     
-    public void SetFormationIndex(int index)
-    {
-        formationIndex = index;
-    }
+
 
     public void ChangeState(ISoldierState newState)
     {
         currentState?.ExitState(this);
         currentState = newState;
         currentState.EnterState(this);
+        State = newState is IdleState ? SoldierState.Idle : newState is MovingState ? SoldierState.Moving : SoldierState.Attacking;
     }
 
-    public void SetTargetPosition(Vector2 targetPos)
+    private void SetTargetPosition(Vector2 targetPos)
     {
         TargetPosition = targetPos;
-        ChangeState(new MovingState());
+        ChangeState(movingFlagState);
     }
 
-    public void Attack()
-    {
-        ChangeState(new AttackState());
-    }
-    
-    // Event handler for when flag position changes
+
     private void OnFlagPositionChanged(Vector2 newFlagPos)
     {
-        // Calculate this soldier's target position based on their formation index
         Vector2 targetPos = newFlagPos + offsetWithFlag;
-        
-        // Move to the new position
         SetTargetPosition(targetPos);
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, DetectionRange);
+        Gizmos.DrawWireSphere(transform.position, 1.2f);
     }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            Monster mon = other.GetComponent<Monster>();
+            if (mon != null && monsterTarget == null)
+            {
+                monsterTarget = mon;
+            }
+        }
+    }
+    
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            Monster mon = other.GetComponent<Monster>();
+            if (mon != null && monsterTarget == mon)
+            {
+                monsterTarget = null;
+                ChangeState(movingState);
+            }
+        }
+    }
+    
+   
+}
+
+
+public enum SoldierState
+{
+    Idle,
+    Moving,
+    MovingFlag,
+    Attacking
+    
 }

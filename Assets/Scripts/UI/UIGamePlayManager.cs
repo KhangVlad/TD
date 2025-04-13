@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
+using DG.Tweening;
 
 public class UIGamePlayManager : MonoBehaviour
 {
     public static UIGamePlayManager Instance { get; private set; }
+
     public RectTransform uiCircleSelection;
     public Canvas canvas;
     public Animator circleSelectionAnimator;
@@ -13,12 +16,15 @@ public class UIGamePlayManager : MonoBehaviour
     [SerializeField] private Transform _uiBuildingSlotParent;
     [SerializeField] private Button flagBtn;
     [SerializeField] private GameObject flagPrefab;
-
+    
+    [SerializeField] private LayerMask buildingLayer;
+    private GameObject _flagInstance;
     public bool IsActiveFlag = false;
+    public List<UIBuidingSlot> _buildingSlotPool = new List<UIBuidingSlot>();
     private Vector2 _mousePos;
-
     private BuildSpot _currentSelected;
-    public BaseTower _currentTower;
+    private BaseTower _currentTower;
+    private Coroutine _flagCoroutine;
 
     private void Awake()
     {
@@ -68,34 +74,71 @@ public class UIGamePlayManager : MonoBehaviour
 
     private void PlaceFlag()
     {
-        if (_currentTower != null && _currentTower is Barracks barracks)
+        if (_currentTower is not null && _currentTower is Barracks barracks)
         {
             barracks.OnFlagPlaced(_mousePos);
+            StartCoroutine(FlagAppear());
             IsActiveFlag = false;
         }
     }
 
+    private IEnumerator FlagAppear()
+    {
+        if (_flagCoroutine != null)
+        {
+            StopCoroutine(_flagCoroutine);
+            //
+        }
+
+        float durationAppear = 0.5f;
+
+        if (_flagInstance == null)
+        {
+            _flagInstance = Instantiate(flagPrefab, _mousePos, Quaternion.identity);
+        }
+        else
+        {
+            _flagInstance.SetActive(true);
+        }
+
+        _flagInstance.transform.position = _mousePos;
+
+        // Ensure the flag has a SpriteRenderer
+        SpriteRenderer spriteRenderer = _flagInstance.GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            // Set initial alpha to 0
+            spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 0);
+            yield return spriteRenderer.DOFade(1f, durationAppear).WaitForCompletion();
+            yield return new WaitForSeconds(durationAppear);
+            yield return spriteRenderer.DOFade(0f, durationAppear).WaitForCompletion();
+        }
+
+        _flagInstance.SetActive(false);
+    }
+
     private void HandleMouseClick()
     {
-        RaycastHit2D hit = Physics2D.Raycast(_mousePos, Vector2.zero);
+        RaycastHit2D hit = Physics2D.Raycast(_mousePos, Vector2.zero, 100f, buildingLayer);
         if (hit.collider == null)
         {
             uiCircleSelection?.gameObject.SetActive(false);
             _currentSelected = null;
-            // _currentTower = null;
+            _currentTower = null;
             return;
         }
 
         if (hit.collider.TryGetComponent<BuildSpot>(out BuildSpot buildingSpot))
         {
             _currentSelected = buildingSpot;
-            // _currentTower = null;
+            _currentTower = null;
             OnBuildingSpotClicked(buildingSpot);
         }
 
         if (hit.collider.TryGetComponent<BaseTower>(out BaseTower tower))
         {
             _currentTower = tower;
+            _currentSelected = null;
             InitializeUpgradableSlots(tower.dataSO);
         }
     }
@@ -124,6 +167,8 @@ public class UIGamePlayManager : MonoBehaviour
     {
         HideAllSlots();
         List<TowerSO> nextLevelTowers = GameDataManager.Instance.GetPossibleUpgrade(so);
+        if (nextLevelTowers.Count == 0) return;
+
         uiCircleSelection.gameObject.SetActive(true);
         float radius = 100f;
         float angleStep = 360f / nextLevelTowers.Count;
@@ -137,7 +182,6 @@ public class UIGamePlayManager : MonoBehaviour
             slot.OnUpgrade += (data) =>
             {
                 CreateBuilding(data);
-                Destroy(_currentTower.gameObject);
                 uiCircleSelection.gameObject.SetActive(false);
             };
             float angle = i * angleStep * Mathf.Deg2Rad;
@@ -145,24 +189,30 @@ public class UIGamePlayManager : MonoBehaviour
             float y = Mathf.Sin(angle) * radius;
             slot.transform.localPosition = new Vector3(x, y, 0);
         }
+
         AppearCircle(_currentTower.transform.position);
     }
 
     private void CreateBuilding(TowerSO towerData)
     {
-       
+        if (_currentSelected == null || towerData == null || towerData.prefab == null)
+        {
+            Debug.LogError("Cannot create tower: missing build spot or tower data");
+            return;
+        }
+
         if (!GameDataManager.Instance.CanAfford(towerData.buildCost))
         {
             Debug.Log("Not enough resources to build " + towerData.towerName);
             return;
         }
+
         GameObject towerObj = Instantiate(towerData.prefab, _currentSelected.transform.position, Quaternion.identity);
+
         BaseTower tower = towerObj.GetComponent<BaseTower>();
         if (tower != null)
         {
             tower.dataSO = towerData;
-
-            // Special handling for Barracks tower
             if (tower is Barracks barracks)
             {
                 barracks.InitializeTower(towerData);
@@ -181,11 +231,10 @@ public class UIGamePlayManager : MonoBehaviour
     {
         foreach (Transform child in _uiBuildingSlotParent)
         {
-            child.gameObject.SetActive(false);
+            Destroy(child.gameObject);
         }
     }
 
-  
 
     private void InitializeAllBaseTowers()
     {
@@ -197,7 +246,7 @@ public class UIGamePlayManager : MonoBehaviour
         for (int i = 0; i < baseTowers.Count; i++)
         {
             TowerSO towerSO = baseTowers[i];
-            UIBuidingSlot slot = Instantiate( _uiBuidingSlotPrefab , _uiBuildingSlotParent);
+            UIBuidingSlot slot = Instantiate(_uiBuidingSlotPrefab, _uiBuildingSlotParent);
             slot.transform.SetParent(_uiBuildingSlotParent, false);
             slot.Initialize(towerSO);
 
