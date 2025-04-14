@@ -8,7 +8,7 @@ public class UIBuidingSlot : MonoBehaviour
     [SerializeField] private Button upgradeButton;
     [SerializeField] private Image towerImage;
     [SerializeField] private TextMeshProUGUI cost;
-    private TowerSO towerSO;
+    public TowerSO towerSO;
     public event Action<TowerSO> OnUpgrade;
 
     private void Start()
@@ -19,7 +19,6 @@ public class UIBuidingSlot : MonoBehaviour
     private void OnDestroy()
     {
         upgradeButton.onClick.RemoveListener(OnUpgradeButtonClick);
-        OnUpgrade = null;
         
     }
 

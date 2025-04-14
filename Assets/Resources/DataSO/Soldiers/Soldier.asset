@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d2ca8e7dc114d46b99dd909bb2d6f8d, type: 3}
+  m_Name: Soldier
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 1179277266788537395, guid: 145f0d0feec4a42cd898e71e99d60783, type: 3}
+  sprite: {fileID: -7931289553904102634, guid: 6721f3c9ee65b4eefa6e3d909edf0160, type: 3}
+  health: 100
+  damage: 20
+  speed: 1.4
+  attackRange: 0.5
+  detectionRange: 1

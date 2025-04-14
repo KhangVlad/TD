@@ -70,7 +70,7 @@ public class Barracks : BaseTower
         GameObject soldierObj = Instantiate(towerData.soldierPrefab, transform.position, Quaternion.identity);
         Soldier soldier = soldierObj.GetComponent<Soldier>();
         _soldiers[_soldierCount] = soldier;
-        soldier.InitializeWithFlagPosition(_flagPosition, triangleOffsets[formationIndex],this);
+        soldier.InitializeWithFlagPosition(_flagPosition, triangleOffsets[formationIndex],this,towerData.soldierData);
         _soldierCount++;
     }
 

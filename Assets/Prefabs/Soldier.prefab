@@ -98,7 +98,7 @@ Animator:
   m_GameObject: {fileID: 993366916043872532}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: -8146804650158481509, guid: 6721f3c9ee65b4eefa6e3d909edf0160, type: 3}
+  m_Controller: {fileID: 9100000, guid: f268f29018cbc49ba83e6695eb5474c4, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -157,8 +157,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bc2dd544160483fac1b8bf742e49a61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  anim: {fileID: 2844656593814042212}
+  soldierSprite: {fileID: 5301231165420360375}
   monsterTarget: {fileID: 0}
+  TargetPosition: {x: 0, y: 0}
   State: 0
+  soldierSO: {fileID: 0}
 --- !u!50 &5308657931697378887
 Rigidbody2D:
   serializedVersion: 5

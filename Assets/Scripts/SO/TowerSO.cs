@@ -23,7 +23,9 @@ public class TowerSO : ScriptableObject
     public int maxUnits = 3;
     public float spawnTime = 5f;
     public GameObject soldierPrefab;
+    public SoldierSO soldierData;
 
     [Header("Upgrade Options")] 
     public List<TowerType> possibleUpgrades;
+    
 }

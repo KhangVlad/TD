@@ -3,8 +3,7 @@ using UnityEngine;
 
 public class MonsterManager : MonoBehaviour
 {
-    private static MonsterManager _instance;
-    public static MonsterManager Instance => _instance;
+    public static MonsterManager Instance { get; private set; }
     public List<PathNode> mainPath = new List<PathNode>();
     private List<Monster> activeMonsters = new List<Monster>();
     
@@ -12,10 +11,15 @@ public class MonsterManager : MonoBehaviour
     
     private void Awake()
     {
-        if (_instance == null)
-            _instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
         else
+        {
             Destroy(gameObject);
+
+        }
     }
 
     private void SpawnMonster()
@@ -33,7 +37,6 @@ public class MonsterManager : MonoBehaviour
     
     private void Update()
     {
-        // Update all monsters' states in one place
         for (int i = activeMonsters.Count - 1; i >= 0; i--)
         {
             activeMonsters[i].CurrentState.UpdateState(activeMonsters[i]);
