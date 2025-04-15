@@ -33,6 +33,7 @@ public class MovingState : ISoldierState
     public void EnterState(Soldier soldier)
     {
         soldier.PlayRunAnimation(true);
+        soldier.LookAtDirection( soldier.monsterTarget.transform.position);
     }
 
     public void UpdateState(Soldier soldier)
@@ -64,6 +65,7 @@ public class MovingFlagState : ISoldierState
     public void EnterState(Soldier soldier)
     {
         soldier.PlayRunAnimation(true);
+        soldier.LookAtDirection(soldier.flagPos);
     }
 
     public void UpdateState(Soldier soldier)
@@ -71,12 +73,12 @@ public class MovingFlagState : ISoldierState
         // Move towards the flag position
         soldier.transform.position = Vector2.MoveTowards(
             soldier.transform.position,
-            soldier.TargetPosition,
+            soldier.flagPos,
             soldier.MovementSpeed * Time.deltaTime
         );
 
         // Check if the soldier has reached the target position
-        if (Vector2.Distance(soldier.transform.position, soldier.TargetPosition) <= 0.1f)
+        if (Vector2.Distance(soldier.transform.position, soldier.flagPos) <= 0.1f)
         {
             reachTargetPosition = true;
             soldier.ChangeState(SoldierState.Idle);
