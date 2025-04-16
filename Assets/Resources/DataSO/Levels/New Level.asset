@@ -12,12 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: New Level
   m_EditorClassIdentifier: Assembly-CSharp::LevelDataSO
-  levelName: 
+  levelName: 1
   levelNumber: 0
-  levelThumbnail: {fileID: 0}
-  levelDescription: 
+  levelThumbnail: {fileID: 8006088990915778119, guid: 295f1e02bebdb4c269c1724b7bbb51b8, type: 3}
+  levelDescription: sd
   startingResources: 100
   resourcesPerWaveCompleted: 50
   timeBetweenWaves: 20
-  waves: []
+  waves:
+  - waveName: 1
+    waveStartDelay: 20
+    monsters:
+    - monsterType: 0
+      quantity: 10
+      spawnDelay: 0.5
   maxAllowedLeaks: 10

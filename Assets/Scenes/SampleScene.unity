@@ -406,6 +406,68 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodeIndex: 0
+--- !u!1 &364840756
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 364840758}
+  - component: {fileID: 364840757}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &364840757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364840756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c2ac64ec154025b3fe73d813e509a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentLevel: {fileID: 11400000, guid: a7eb3ac7c48ce48c496bc1e327c39539, type: 2}
+  onWaveStart:
+    m_PersistentCalls:
+      m_Calls: []
+  onWaveComplete:
+    m_PersistentCalls:
+      m_Calls: []
+  onLevelComplete:
+    m_PersistentCalls:
+      m_Calls: []
+  onLevelFailed:
+    m_PersistentCalls:
+      m_Calls: []
+  onWaveProgress:
+    m_PersistentCalls:
+      m_Calls: []
+  autoStartWaves: 1
+  debugMode: 0
+--- !u!4 &364840758
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364840756}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.4523901, y: 0.6804169, z: -0.035999447}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1367,6 +1429,7 @@ MonoBehaviour:
   - {fileID: 789743315}
   - {fileID: 1605514314}
   monsterPrefab: {fileID: 2669970522930166874, guid: 34eb5fa5092bb473d9df782867bbeb5f, type: 3}
+  monsterContainer: {fileID: 0}
 --- !u!4 &1071518360
 Transform:
   m_ObjectHideFlags: 0
@@ -1483,6 +1546,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   towerSOList: []
   monsterSOList: []
+  levelDataList: []
+  currentResources: 100
+  onResourcesChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  currentLevelIndex: 0
+  highestUnlockedLevel: 0
+  loadDataOnStart: 1
 --- !u!4 &1223752329
 Transform:
   m_ObjectHideFlags: 0
@@ -2303,3 +2374,4 @@ SceneRoots:
   - {fileID: 1715311442}
   - {fileID: 1678536821}
   - {fileID: 1858086261}
+  - {fileID: 364840758}
