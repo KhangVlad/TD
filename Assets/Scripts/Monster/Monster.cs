@@ -59,11 +59,21 @@ public class Monster : MonoBehaviour
     
     private void OnDestroy()
     {
+        // Clear soldier's target reference if we're dying
+        if (targetSoldier != null)
+        {
+            targetSoldier.monsterTarget = null;
+            targetSoldier.isEngaged = false;
+        }
+        
         // Clean up health bar
         if (_healthBar != null && UIHealthBarManager.Instance != null)
         {
             UIHealthBarManager.Instance.ReleaseHealthBar(_healthBar);
         }
+        
+        // Clean up in monster manager
+        MonsterManager.Instance?.RemoveMonster(this);
     }
     
     #endregion
@@ -163,19 +173,18 @@ public class Monster : MonoBehaviour
     
     private void Die()
     {
+        // Notify the MonsterManager about the defeat
         MonsterManager.Instance.OnMonsterDefeated(this, rewardAmount);
         
-        // // Play death animation or effects
-        // if (animator != null && animator.HasTrigger("Death"))
-        // {
-        //     animator.SetTrigger("Death");
-        //     // You might want to delay the destruction here
-        //     Destroy(gameObject, 1f); // Destroy after animation
-        // }
-        // else
-        // {
-        //     Destroy(gameObject);
-        // }
+        // Release the assigned soldier to find new targets
+        if (targetSoldier != null)
+        {
+            targetSoldier.monsterTarget = null;
+            targetSoldier.isEngaged = false;
+            targetSoldier = null;
+        }
+
+        Destroy(gameObject, 1f);
     }
     
     public void Attack(Soldier target)
@@ -189,18 +198,9 @@ public class Monster : MonoBehaviour
             animator.SetTrigger("Attack");
         }
         
-        // Deal damage to the soldier
-        // This would typically be called from animation events
-        // or after a delay to match the animation
-    }
-    
-    // This can be called from animation events when the attack hits
-    public void DealDamage()
-    {
-        if (targetSoldier != null)
-        {
-            // targetSoldier.TakeDamage(monsterSO.damage);
-        }
+        // Deal damage to the soldier after a delay (could be called from animation event)
+        // For simplicity, we'll deal damage directly here
+        target.TakeDamage(monsterSO.damage);
     }
     
     #endregion
@@ -212,9 +212,16 @@ public class Monster : MonoBehaviour
         if (other.CompareTag("Soldier"))
         {
             Soldier soldier = other.GetComponent<Soldier>();
-            if (soldier != null && targetSoldier == null)
+            
+            // Only detect a soldier if:
+            // 1. We don't already have a target
+            // 2. The soldier doesn't already have a target
+            // 3. The soldier is active
+            if (soldier != null && targetSoldier == null && !soldier.isEngaged && soldier.isActiveAndEnabled)
             {
                 targetSoldier = soldier;
+                soldier.monsterTarget = this;
+                soldier.isEngaged = true;
             }
         }
     }
@@ -224,8 +231,13 @@ public class Monster : MonoBehaviour
         if (other.CompareTag("Soldier"))
         {
             Soldier soldier = other.GetComponent<Soldier>();
+            
+            // Only clear if this is our current target
             if (soldier != null && targetSoldier == soldier)
             {
+                // Let the soldier know it's no longer engaged with us
+                targetSoldier.monsterTarget = null;
+                targetSoldier.isEngaged = false;
                 targetSoldier = null;
             }
         }

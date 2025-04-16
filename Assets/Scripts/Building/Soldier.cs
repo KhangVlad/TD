@@ -2,12 +2,10 @@ using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-
 public class Soldier : MonoBehaviour
 {
-    [Header("Components")] [SerializeField]
-    private Animator anim;
-
+    [Header("Components")] 
+    [SerializeField] private Animator anim;
     [SerializeField] private SpriteRenderer soldierSprite;
 
     private ISoldierState currentState;
@@ -18,15 +16,20 @@ public class Soldier : MonoBehaviour
     public SoldierState State;
     private Vector2 offsetWithFlag;
     private UIHealthBar _healthBar;
+    
+    [Header("Combat")]
+    public float currentHealth;
+    public float maxHealth;
+    public bool isEngaged = false; // Tracks if soldier is engaged with a monster
 
-    [Header("State")] public IdleState idleState;
+    [Header("State")] 
+    public IdleState idleState;
     public MovingState movingState;
     public AttackState attackState;
     public MovingFlagState movingFlagState;
 
-
-    [Header("Data and Stats")] public SoldierSO soldierSO;
-
+    [Header("Data and Stats")] 
+    public SoldierSO soldierSO;
 
     private void Awake()
     {
@@ -39,27 +42,47 @@ public class Soldier : MonoBehaviour
     private void Start()
     {
         _healthBar = UIHealthBarManager.Instance.CreateHealthBarForTarget(transform);
+        
+        // Initialize health
+        if (soldierSO != null)
+        {
+            maxHealth = soldierSO.health;
+            currentHealth = maxHealth;
+        }
+        else
+        {
+            maxHealth = 100;
+            currentHealth = maxHealth;
+        }
+        
+        if (_healthBar != null)
+        {
+            _healthBar.SetFillAmountImmediate(1f);
+        }
     }
+    
     private void OnDestroy()
     {
         if (_healthBar != null)
         {
-            UIHealthBarManager.Instance.ReleaseHealthBar( _healthBar);
+            UIHealthBarManager.Instance.ReleaseHealthBar(_healthBar);
         }
     }
-
 
     public void InitializeWithFlagPosition(Vector2 flagPosition, Vector2 offset, Barracks b, SoldierSO s)
     {
         offsetWithFlag = offset;
-        attackRange = 0.2f;
+        attackRange = s != null ? s.attackRange : 0.2f;
         Vector2 targetPos = flagPosition + offset;
         flagPos = targetPos;
         soldierSO = s;
+        
+        maxHealth = s.health;
+        currentHealth = maxHealth;
+        
         ChangeState(SoldierState.MovingFlag);
         b.OnFlagPositionChanged += OnFlagPositionChanged;
     }
-
 
     private void Update()
     {
@@ -73,7 +96,6 @@ public class Soldier : MonoBehaviour
         else
             soldierSprite.flipX = false;
     }
-
 
     #region State Machine
 
@@ -102,16 +124,19 @@ public class Soldier : MonoBehaviour
         currentState.EnterState(this);
     }
 
-
     private void OnFlagPositionChanged(Vector2 newFlagPos)
     {
         Vector2 targetPos = newFlagPos + offsetWithFlag;
         flagPos = targetPos;
-        ChangeState(SoldierState.MovingFlag);
+        
+        // Only change to moving flag state if not currently engaged with a monster
+        if (!isEngaged)
+        {
+            ChangeState(SoldierState.MovingFlag);
+        }
     }
 
     #endregion
-
 
     #region Detect Enemy
 
@@ -120,9 +145,23 @@ public class Soldier : MonoBehaviour
         if (other.CompareTag("Enemy"))
         {
             Monster mon = other.GetComponent<Monster>();
-            if (mon != null && monsterTarget == null)
+            
+            // Only engage if the soldier is not already engaged and the monster has no target
+            if (mon != null && monsterTarget == null && !isEngaged && mon.targetSoldier == null)
             {
                 monsterTarget = mon;
+                mon.targetSoldier = this;
+                isEngaged = true;
+                
+                // Change state to attacking if in range
+                if (Vector2.Distance(transform.position, mon.transform.position) <= attackRange)
+                {
+                    ChangeState(SoldierState.Attacking);
+                }
+                else
+                {
+                    ChangeState(SoldierState.Moving);
+                }
             }
         }
     }
@@ -134,11 +173,61 @@ public class Soldier : MonoBehaviour
             Monster mon = other.GetComponent<Monster>();
             if (mon != null && monsterTarget == mon)
             {
+                // Only clear the target if this is actually our target
                 monsterTarget = null;
+                isEngaged = false;
+                
+                // If the monster had this soldier as target, clear it
+                if (mon.targetSoldier == this)
+                {
+                    mon.targetSoldier = null;
+                }
+                
+                // Go back to flag position
+                ChangeState(SoldierState.MovingFlag);
             }
         }
     }
 
+    #endregion
+
+    #region Combat
+
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        
+        // Update health bar
+        if (_healthBar != null)
+        {
+            _healthBar.UpdateFillAmount(currentHealth / maxHealth);
+        }
+        
+        // Play hit animation if available
+        
+        // Check if dead
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+    
+    private void Die()
+    {
+        // Tell monster this soldier is no longer a valid target
+        if (monsterTarget != null && monsterTarget.targetSoldier == this)
+        {
+            monsterTarget.targetSoldier = null;
+        }
+        
+        // Notify barracks that a soldier died (optional)
+        
+        // Play death animation
+        
+        // Destroy after animation or immediately
+        Destroy(gameObject);
+    }
+    
     #endregion
 
     #region Animation Controller
@@ -161,7 +250,6 @@ public class Soldier : MonoBehaviour
 
     #endregion
 }
-
 
 public enum SoldierState
 {

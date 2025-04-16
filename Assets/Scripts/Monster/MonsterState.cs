@@ -12,8 +12,6 @@ public class MonsterMovingState : IMonsterState
     private Vector3 targetNodePosition;
     private bool isTargetNodeCached = false;
 
-    
-
     public void EnterState(Monster monster)
     {
         isTargetNodeCached = false;
@@ -21,12 +19,14 @@ public class MonsterMovingState : IMonsterState
 
     public void UpdateState(Monster monster)
     {
-        if (monster.targetSoldier is not null)
+        // If the monster already has a target and the target is valid, pursue it
+        if (monster.targetSoldier != null && monster.targetSoldier.isActiveAndEnabled)
         {
             monster.transform.position = Vector2.MoveTowards(
                 monster.transform.position,
-                monster.targetSoldier.transform.position+ new Vector3(0.1f, 0.1f,0),
+                monster.targetSoldier.transform.position + new Vector3(0.1f, 0.1f, 0),
                 monster.Speed * Time.deltaTime);
+                
             if (Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position) <= monster.attackRange)
             {
                 monster.ChangeState(MonsterState.Attack);
@@ -34,6 +34,7 @@ public class MonsterMovingState : IMonsterState
         }
         else
         {
+            // No target, follow the path
             if (MonsterManager.Instance.IsPathComplete(monster.currentNodeIndex))
             {
                 monster.ChangeState(MonsterState.PathComplete);
@@ -46,7 +47,7 @@ public class MonsterMovingState : IMonsterState
                 isTargetNodeCached = true;
             }
 
-            // Move toward target
+            // Move toward target node
             monster.transform.position = Vector3.MoveTowards(
                 monster.transform.position,
                 targetNodePosition,
@@ -86,30 +87,30 @@ public class MonsterAttackingState : IMonsterState
     {
     }
 
-
     public void UpdateState(Monster monster)
     {
-        if (monster.targetSoldier == null)
+        if (monster.targetSoldier == null || !monster.targetSoldier.isActiveAndEnabled)
         {
+            monster.targetSoldier = null;
             monster.ChangeState(MonsterState.Moving);
             return;
         }
+        
         if (Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position) <= monster.attackRange)
         {
             _attackTimer += Time.deltaTime;
             if (_attackTimer >= _attackCooldown)
             {
+                // Attack the soldier
+                monster.Attack(monster.targetSoldier);
                 _attackTimer = 0;
             }
         }
-        
-        if( (Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position) > monster.attackRange *1.5f))
+        else if (Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position) > monster.attackRange * 1.5f)
         {
             monster.ChangeState(MonsterState.Moving);
         }
-        
     }
-
 
     public void ExitState(Monster monster)
     {
@@ -121,7 +122,7 @@ public class PathCompleteState : IMonsterState
     public void EnterState(Monster monster)
     {
         Debug.Log("Monster entered Path Complete state");
-        MonsterManager.Instance.RemoveMonster(monster);
+        MonsterManager.Instance.OnMonsterReachedEnd(monster);
         monster.OnPathComplete();
     }
 
