@@ -129,7 +129,7 @@ public class BuildingManager : MonoBehaviour
         if (_currentSelectedTower is Barracks barracks)
         {
             barracks.OnFlagPlaced(_mousePos);
-            StartCoroutine(AnimateFlagAppearance());
+            // StartCoroutine(AnimateFlagAppearance());
             IsPlacingFlag = false;
         }
     }

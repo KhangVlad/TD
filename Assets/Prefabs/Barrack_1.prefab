@@ -104,8 +104,9 @@ MonoBehaviour:
   dataSO: {fileID: 0}
   maxSoldiers: 3
   spawnTime: 5
-  flagPrefab: {fileID: 0}
+  flagPrefab: {fileID: 4244005603585195159, guid: f7a3f72a3f75a4fc1a6b263f9b751563, type: 3}
   towerData: {fileID: 0}
+  _detectRange: 1
 --- !u!61 &3283637385545127772
 BoxCollider2D:
   m_ObjectHideFlags: 0

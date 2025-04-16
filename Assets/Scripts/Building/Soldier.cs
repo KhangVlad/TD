@@ -1,35 +1,36 @@
 using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class Soldier : MonoBehaviour
 {
-    [Header("Components")] 
-    [SerializeField] private Animator anim;
+    [Header("Components")] [SerializeField]
+    private Animator anim;
+
     [SerializeField] private SpriteRenderer soldierSprite;
 
-    private ISoldierState currentState;
-    public Monster monsterTarget;
-    public Vector2 flagPos;
-    public float attackRange { get; set; }
-    public float MovementSpeed { get; set; } = 2f;
-    public SoldierState State;
-    private Vector2 offsetWithFlag;
-    private UIHealthBar _healthBar;
-    
-    [Header("Combat")]
-    public float currentHealth;
-    public float maxHealth;
-    public bool isEngaged = false; // Tracks if soldier is engaged with a monster
-
-    [Header("State")] 
-    public IdleState idleState;
+    [Header("State")] public IdleState idleState;
     public MovingState movingState;
     public AttackState attackState;
     public MovingFlagState movingFlagState;
 
-    [Header("Data and Stats")] 
-    public SoldierSO soldierSO;
+    [Header("Data and Stats")] public SoldierSO soldierSO;
+
+    // State tracking
+    private ISoldierState currentState;
+    public SoldierState State { get; private set; }
+    public Monster monsterTarget { get; private set; }
+
+    // Position and movement data
+    public Vector2 flagPos;
+    private Vector2 offsetWithFlag;
+    private Barracks parentBarracks;
+
+    // Stats
+    public float attackRange { get; private set; }
+    public float MovementSpeed { get; private set; } = 2f;
+
+    // UI
+    private UIHealthBar _healthBar;
 
     private void Awake()
     {
@@ -41,47 +42,52 @@ public class Soldier : MonoBehaviour
 
     private void Start()
     {
-        _healthBar = UIHealthBarManager.Instance.CreateHealthBarForTarget(transform);
-        
-        // Initialize health
-        if (soldierSO != null)
-        {
-            maxHealth = soldierSO.health;
-            currentHealth = maxHealth;
-        }
-        else
-        {
-            maxHealth = 100;
-            currentHealth = maxHealth;
-        }
-        
-        if (_healthBar != null)
-        {
-            _healthBar.SetFillAmountImmediate(1f);
-        }
+        _healthBar = UIHealthBarManager.Instance?.CreateHealthBarForTarget(transform);
     }
-    
+
     private void OnDestroy()
     {
-        if (_healthBar != null)
+        // Clean up health bar
+        if (_healthBar != null && UIHealthBarManager.Instance != null)
         {
             UIHealthBarManager.Instance.ReleaseHealthBar(_healthBar);
         }
+
+        // Unregister from barracks
+        if (parentBarracks != null)
+        {
+            parentBarracks.OnFlagPositionChanged -= OnFlagPositionChanged;
+        }
     }
 
-    public void InitializeWithFlagPosition(Vector2 flagPosition, Vector2 offset, Barracks b, SoldierSO s)
+    public void InitializeWithFlagPosition(Vector2 flagPosition, Vector2 offset, Barracks barracks, SoldierSO data)
     {
+        // Set references
+        parentBarracks = barracks;
+        soldierSO = data;
         offsetWithFlag = offset;
-        attackRange = s != null ? s.attackRange : 0.2f;
-        Vector2 targetPos = flagPosition + offset;
-        flagPos = targetPos;
-        soldierSO = s;
-        
-        maxHealth = s.health;
-        currentHealth = maxHealth;
-        
+
+        // Set position data
+        flagPos = flagPosition + offset;
+
+        // Set stats from scriptable object
+        if (data != null)
+        {
+            attackRange = data.attackRange;
+            MovementSpeed = data.speed;
+        }
+        else
+        {
+            // Default values if data is missing
+            attackRange = 0.2f;
+            MovementSpeed = 2f;
+        }
+
+        // Register for flag updates
+        barracks.OnFlagPositionChanged += OnFlagPositionChanged;
+
+        // Start in MovingFlag state to get to position
         ChangeState(SoldierState.MovingFlag);
-        b.OnFlagPositionChanged += OnFlagPositionChanged;
     }
 
     private void Update()
@@ -89,9 +95,28 @@ public class Soldier : MonoBehaviour
         currentState?.UpdateState(this);
     }
 
-    public void LookAtDirection(Vector2 dir)
+    public void SetTarget(Monster target)
     {
-        if (dir.x < transform.position.x)
+        if (monsterTarget != null && monsterTarget != target)
+        {
+            monsterTarget.SetSoldierTarget(null);
+        }
+
+        monsterTarget = target;
+        if (target != null)
+        {
+            monsterTarget.SetSoldierTarget(this);
+        }
+
+        if (target != null)
+        {
+            ChangeState(SoldierState.Moving);
+        }
+    }
+
+    public void LookAtDirection(Vector2 targetPosition)
+    {
+        if (targetPosition.x < transform.position.x)
             soldierSprite.flipX = true;
         else
             soldierSprite.flipX = false;
@@ -103,6 +128,7 @@ public class Soldier : MonoBehaviour
     {
         currentState?.ExitState(this);
         State = newState;
+
         switch (newState)
         {
             case SoldierState.Idle:
@@ -121,131 +147,47 @@ public class Soldier : MonoBehaviour
                 throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
         }
 
+        // Enter the new state
         currentState.EnterState(this);
     }
 
+    // Flag position change handler
     private void OnFlagPositionChanged(Vector2 newFlagPos)
     {
-        Vector2 targetPos = newFlagPos + offsetWithFlag;
-        flagPos = targetPos;
-        
-        // Only change to moving flag state if not currently engaged with a monster
-        if (!isEngaged)
-        {
-            ChangeState(SoldierState.MovingFlag);
-        }
+        // Update flag position
+        flagPos = newFlagPos + offsetWithFlag;
+
+        // Go to new position (priority over combat)
+        ChangeState(SoldierState.MovingFlag);
     }
 
-    #endregion
-
-    #region Detect Enemy
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Enemy"))
-        {
-            Monster mon = other.GetComponent<Monster>();
-            
-            // Only engage if the soldier is not already engaged and the monster has no target
-            if (mon != null && monsterTarget == null && !isEngaged && mon.targetSoldier == null)
-            {
-                monsterTarget = mon;
-                mon.targetSoldier = this;
-                isEngaged = true;
-                
-                // Change state to attacking if in range
-                if (Vector2.Distance(transform.position, mon.transform.position) <= attackRange)
-                {
-                    ChangeState(SoldierState.Attacking);
-                }
-                else
-                {
-                    ChangeState(SoldierState.Moving);
-                }
-            }
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.CompareTag("Enemy"))
-        {
-            Monster mon = other.GetComponent<Monster>();
-            if (mon != null && monsterTarget == mon)
-            {
-                // Only clear the target if this is actually our target
-                monsterTarget = null;
-                isEngaged = false;
-                
-                // If the monster had this soldier as target, clear it
-                if (mon.targetSoldier == this)
-                {
-                    mon.targetSoldier = null;
-                }
-                
-                // Go back to flag position
-                ChangeState(SoldierState.MovingFlag);
-            }
-        }
-    }
-
-    #endregion
-
-    #region Combat
-
-    public void TakeDamage(float damage)
-    {
-        currentHealth -= damage;
-        
-        // Update health bar
-        if (_healthBar != null)
-        {
-            _healthBar.UpdateFillAmount(currentHealth / maxHealth);
-        }
-        
-        // Play hit animation if available
-        
-        // Check if dead
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
-    }
-    
-    private void Die()
-    {
-        // Tell monster this soldier is no longer a valid target
-        if (monsterTarget != null && monsterTarget.targetSoldier == this)
-        {
-            monsterTarget.targetSoldier = null;
-        }
-        
-        // Notify barracks that a soldier died (optional)
-        
-        // Play death animation
-        
-        // Destroy after animation or immediately
-        Destroy(gameObject);
-    }
-    
     #endregion
 
     #region Animation Controller
 
     public void PlayAttackAnimation()
     {
-        anim.SetTrigger("Attack");
-        anim.SetFloat("Blend", UnityEngine.Random.Range(0f, 1f));
+        if (anim != null)
+        {
+            anim.SetTrigger("Attack");
+            anim.SetFloat("Blend", UnityEngine.Random.Range(0f, 1f));
+        }
     }
 
     public void PlayRunAnimation(bool active)
     {
-        anim.SetBool("Run", active);
+        if (anim != null)
+        {
+            anim.SetBool("Run", active);
+        }
     }
 
     public void PlayIdleAnimation()
     {
-        anim.SetTrigger("Idle");
+        if (anim != null)
+        {
+            anim.SetTrigger("Idle");
+        }
     }
 
     #endregion

@@ -19,22 +19,29 @@ public class MonsterMovingState : IMonsterState
 
     public void UpdateState(Monster monster)
     {
-        // If the monster already has a target and the target is valid, pursue it
-        if (monster.targetSoldier != null && monster.targetSoldier.isActiveAndEnabled)
+        if (monster.targetSoldier != null)
         {
+            if (Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position) <= monster.attackRange)
+            {
+                monster.ChangeState(MonsterState.Attack);
+                return;
+            }
+            
+            // Otherwise, move toward the soldier
             monster.transform.position = Vector2.MoveTowards(
                 monster.transform.position,
                 monster.targetSoldier.transform.position + new Vector3(0.1f, 0.1f, 0),
                 monster.Speed * Time.deltaTime);
                 
+            // Check again if we've reached attack range
             if (Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position) <= monster.attackRange)
             {
                 monster.ChangeState(MonsterState.Attack);
+                return;
             }
         }
         else
         {
-            // No target, follow the path
             if (MonsterManager.Instance.IsPathComplete(monster.currentNodeIndex))
             {
                 monster.ChangeState(MonsterState.PathComplete);
@@ -53,7 +60,7 @@ public class MonsterMovingState : IMonsterState
                 targetNodePosition,
                 monster.Speed * Time.deltaTime);
 
-            // Use squared distance for better performance
+            // Check if we've reached the target node
             Vector3 offset = monster.transform.position - targetNodePosition;
             float sqrDistance = offset.sqrMagnitude;
 
@@ -73,7 +80,7 @@ public class MonsterMovingState : IMonsterState
 
     public void ExitState(Monster monster)
     {
-       
+        // Nothing special needed when exiting moving state
     }
 }
 
@@ -85,28 +92,35 @@ public class MonsterAttackingState : IMonsterState
 
     public void EnterState(Monster monster)
     {
+        _attackTimer = 0;
     }
 
     public void UpdateState(Monster monster)
     {
-        if (monster.targetSoldier == null || !monster.targetSoldier.isActiveAndEnabled)
+        if (monster.targetSoldier == null)
         {
-            monster.targetSoldier = null;
             monster.ChangeState(MonsterState.Moving);
             return;
         }
         
-        if (Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position) <= monster.attackRange)
+        float distanceToSoldier = Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position);
+        
+        // If we're in attack range, attack on a timer
+        if (distanceToSoldier <= monster.attackRange)
         {
             _attackTimer += Time.deltaTime;
             if (_attackTimer >= _attackCooldown)
             {
-                // Attack the soldier
-                monster.Attack(monster.targetSoldier);
+                // Attack the soldier (damage would be applied here)
+                // TODO: Add soldier damage implementation
+                
+                // Play attack animation or effect here if available
+                
                 _attackTimer = 0;
             }
         }
-        else if (Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position) > monster.attackRange * 1.5f)
+        // If the soldier moved too far away, go back to chasing
+        else if (distanceToSoldier > monster.attackRange * 1.5f)
         {
             monster.ChangeState(MonsterState.Moving);
         }
@@ -114,6 +128,7 @@ public class MonsterAttackingState : IMonsterState
 
     public void ExitState(Monster monster)
     {
+        // Nothing special needed when exiting attack state
     }
 }
 
@@ -121,8 +136,13 @@ public class PathCompleteState : IMonsterState
 {
     public void EnterState(Monster monster)
     {
-        Debug.Log("Monster entered Path Complete state");
-        MonsterManager.Instance.OnMonsterReachedEnd(monster);
+        // // Clean up any soldier references
+        // if (monster.targetSoldier != null)
+        // {
+        //     monster.targetSoldier = null;
+        // }
+        //
+        MonsterManager.Instance.RemoveMonster(monster);
         monster.OnPathComplete();
     }
 
