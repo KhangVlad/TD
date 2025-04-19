@@ -21,9 +21,21 @@ MonoBehaviour:
   timeBetweenWaves: 20
   waves:
   - waveName: 1
-    waveStartDelay: 20
+    waveStartDelay: 1
     monsters:
     - monsterType: 0
-      quantity: 10
-      spawnDelay: 0.5
+      quantity: 4
+      spawnDelay: 0.2
+  - waveName: 1
+    waveStartDelay: 1
+    monsters:
+    - monsterType: 0
+      quantity: 4
+      spawnDelay: 0.2
+  - waveName: 1
+    waveStartDelay: 1
+    monsters:
+    - monsterType: 0
+      quantity: 4
+      spawnDelay: 0.2
   maxAllowedLeaks: 10

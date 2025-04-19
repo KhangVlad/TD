@@ -72,8 +72,11 @@ public class MovingState : ISoldierState
 }
 
 // MovingFlag state - soldier returns to flag position
+// MovingFlag state - soldier returns to flag position
 public class MovingFlagState : ISoldierState
 {
+    private const float ARRIVAL_THRESHOLD = 0.04f;
+    
     public void EnterState(Soldier soldier)
     {
         soldier.PlayRunAnimation(true);
@@ -82,23 +85,19 @@ public class MovingFlagState : ISoldierState
 
     public void UpdateState(Soldier soldier)
     {
-        
+        // Move towards flag position regardless of monster targets
+        // This ensures the soldier always completes their movement to the flag
         soldier.transform.position = Vector2.MoveTowards(
             soldier.transform.position,
             soldier.flagPos,
             soldier.MovementSpeed * Time.deltaTime
         );
-
-        if (Vector2.Distance(soldier.transform.position, soldier.flagPos) <= 0.1f)//close enough to flag, 
+        
+        // Only switch to idle when the flag position is reached
+        // Ignoring monster targets until the flag is reached
+        if (Vector2.Distance(soldier.transform.position, soldier.flagPos) <= ARRIVAL_THRESHOLD)
         {
-            if (soldier.monsterTarget != null)
-            {
-                soldier.ChangeState(SoldierState.Moving);
-            }
-            else
-            {
-                soldier.ChangeState(SoldierState.Idle);
-            }
+            soldier.ChangeState(SoldierState.Idle);
         }
     }
 
@@ -119,13 +118,13 @@ public class AttackState : ISoldierState
         _attackTimer = 0;
         if (soldier.monsterTarget != null)
         {
+            soldier.monsterTarget.SetSoldierTarget(soldier);
             soldier.LookAtDirection(soldier.monsterTarget.transform.position);
         }
     }
 
     public void UpdateState(Soldier soldier)
     {
-        // If target is lost, return to flag position
         if (soldier.monsterTarget == null)
         {
             soldier.ChangeState(SoldierState.MovingFlag);
@@ -163,5 +162,9 @@ public class AttackState : ISoldierState
 
     public void ExitState(Soldier soldier)
     {
+        if (soldier.monsterTarget != null)
+        {
+            soldier.monsterTarget.SetSoldierTarget(null);
+        }
     }
 }

@@ -3,22 +3,23 @@ using UnityEngine;
 
 public class Soldier : MonoBehaviour
 {
-    [Header("Components")] [SerializeField]
-    private Animator anim;
-
+    [Header("Components")]
+    [SerializeField] private Animator anim;
     [SerializeField] private SpriteRenderer soldierSprite;
 
-    [Header("State")] public IdleState idleState;
+    [Header("State")]
+    public IdleState idleState;
     public MovingState movingState;
     public AttackState attackState;
     public MovingFlagState movingFlagState;
 
-    [Header("Data and Stats")] public SoldierSO soldierSO;
+    [Header("Data and Stats")]
+    public SoldierSO soldierSO;
 
     // State tracking
     private ISoldierState currentState;
-    public SoldierState State { get; private set; }
-    public Monster monsterTarget { get; private set; }
+    public SoldierState State;
+    public Monster monsterTarget;
 
     // Position and movement data
     public Vector2 flagPos;
@@ -26,7 +27,7 @@ public class Soldier : MonoBehaviour
     private Barracks parentBarracks;
 
     // Stats
-    public float attackRange { get; private set; }
+    public float attackRange;
     public float MovementSpeed { get; private set; } = 2f;
 
     // UI
@@ -51,6 +52,12 @@ public class Soldier : MonoBehaviour
         if (_healthBar != null && UIHealthBarManager.Instance != null)
         {
             UIHealthBarManager.Instance.ReleaseHealthBar(_healthBar);
+        }
+
+        // Make sure monster no longer follows this soldier
+        if (monsterTarget != null)
+        {
+            monsterTarget.SetSoldierTarget(null);
         }
 
         // Unregister from barracks
@@ -95,22 +102,18 @@ public class Soldier : MonoBehaviour
         currentState?.UpdateState(this);
     }
 
-    public void SetTarget(Monster target)
+    public void ChangeTarget(Monster target)
     {
-        if (monsterTarget != null && monsterTarget != target)
-        {
-            monsterTarget.SetSoldierTarget(null);
-        }
-
         monsterTarget = target;
         if (target != null)
         {
-            monsterTarget.SetSoldierTarget(this);
-        }
-
-        if (target != null)
-        {
             ChangeState(SoldierState.Moving);
+        }
+        else if (State != SoldierState.MovingFlag)
+        {
+            // If we lost our target and we're not already moving to flag,
+            // go back to idle at flag position
+            ChangeState(SoldierState.MovingFlag);
         }
     }
 
@@ -126,6 +129,16 @@ public class Soldier : MonoBehaviour
 
     public void ChangeState(SoldierState newState)
     {
+        // Before exiting current state, ensure we handle monster targeting correctly
+        if (State == SoldierState.Moving || State == SoldierState.Attacking)
+        {
+            if (newState == SoldierState.MovingFlag && monsterTarget != null)
+            {
+            
+            }
+        }
+
+        // Exit the current state
         currentState?.ExitState(this);
         State = newState;
 
@@ -156,8 +169,6 @@ public class Soldier : MonoBehaviour
     {
         // Update flag position
         flagPos = newFlagPos + offsetWithFlag;
-
-        // Go to new position (priority over combat)
         ChangeState(SoldierState.MovingFlag);
     }
 
@@ -167,27 +178,18 @@ public class Soldier : MonoBehaviour
 
     public void PlayAttackAnimation()
     {
-        if (anim != null)
-        {
-            anim.SetTrigger("Attack");
-            anim.SetFloat("Blend", UnityEngine.Random.Range(0f, 1f));
-        }
+        anim.SetTrigger("Attack");
+        anim.SetFloat("Blend", UnityEngine.Random.Range(0f, 1f));
     }
 
     public void PlayRunAnimation(bool active)
     {
-        if (anim != null)
-        {
-            anim.SetBool("Run", active);
-        }
+        anim.SetBool("Run", active);
     }
-
+    
     public void PlayIdleAnimation()
     {
-        if (anim != null)
-        {
-            anim.SetTrigger("Idle");
-        }
+        anim.SetTrigger("Idle");
     }
 
     #endregion

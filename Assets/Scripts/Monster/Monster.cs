@@ -100,9 +100,7 @@ public class Monster : MonoBehaviour
             // Only clear if we are the target
             if (targetSoldier.monsterTarget == this)
             {
-                // The soldier will handle setting its target to null
-                // We don't call targetSoldier.SetTarget(null) here to avoid circular references
-                // The Barracks will handle this when it detects the monster is gone
+               
             }
             targetSoldier = null;
         }
