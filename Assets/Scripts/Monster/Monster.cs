@@ -6,7 +6,7 @@ public class Monster : MonoBehaviour
     public MonsterSO monsterSO { get; private set; }
     public int currentNodeIndex = 0;
     public float Speed { get; private set; }
-    public float CurrentHealth { get; private set; }
+    public float CurrentHealth;
     public float MaxHealth { get; private set; }
     public float attackRange { get; private set; }
 
@@ -20,7 +20,7 @@ public class Monster : MonoBehaviour
     [SerializeField] private UIHealthBar healthBar;
     
     // Targeting properties - used by Soldier class
-    public Soldier targetSoldier;
+    public Unit targetSoldier;
 
     private void Awake()
     {
@@ -39,8 +39,9 @@ public class Monster : MonoBehaviour
             healthBar = UIHealthBarManager.Instance.CreateHealthBarForTarget(transform);
         }
     }
-    public void SetSoldierTarget(Soldier s)
+    public void SetSoldierTarget(Unit s)
     {
+        if(s is Archer)  return;
         this.targetSoldier = s;
     }
 

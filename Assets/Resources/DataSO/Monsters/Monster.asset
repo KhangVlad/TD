@@ -12,8 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ddeb1d4a92f4dc994a55db28fdbd4fc, type: 3}
   m_Name: Monster
   m_EditorClassIdentifier: 
+  monsterName: 
   sprite: {fileID: -1577746839068193429, guid: 2f2ce15754b174476b3a1c0d75b703b1, type: 3}
   type: 0
   health: 100
   damage: 3
-  speed: 1.5
+  speed: 1
+  rewardAmount: 10
+  tintColor: {r: 1, g: 1, b: 1, a: 1}
+  scale: 1
+  physicalResistance: 0
+  magicalResistance: 0
+  canFly: 0
+  isBoss: 0
+  aggressiveBehavior: 0
+  description: 

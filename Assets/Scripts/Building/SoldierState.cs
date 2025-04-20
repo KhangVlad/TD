@@ -16,7 +16,6 @@ public class IdleState : ISoldierState
 
     public void UpdateState(Soldier soldier)
     {
-        // If we have a target assigned by the barracks, start moving to engage
         if (soldier.monsterTarget != null)
         {
             soldier.ChangeState(SoldierState.Moving);
@@ -25,18 +24,14 @@ public class IdleState : ISoldierState
 
     public void ExitState(Soldier soldier)
     {
-        // Nothing special to do when leaving idle state
     }
 }
 
-// Moving state - soldier moves toward the targeted monster
 public class MovingState : ISoldierState
 {
     public void EnterState(Soldier soldier)
     {
         soldier.PlayRunAnimation(true);
-        
-        // Update direction immediately
         if (soldier.monsterTarget != null)
         {
             soldier.LookAtDirection(soldier.monsterTarget.transform.position);
@@ -45,13 +40,11 @@ public class MovingState : ISoldierState
 
     public void UpdateState(Soldier soldier)
     {
-        // If target is lost, return to flag position
         if (soldier.monsterTarget == null)
         {
             soldier.ChangeState(SoldierState.MovingFlag);
             return;
         }
-
         soldier.transform.position = Vector2.MoveTowards(
             soldier.transform.position,
             soldier.monsterTarget.transform.position,
@@ -71,32 +64,58 @@ public class MovingState : ISoldierState
     }
 }
 
-// MovingFlag state - soldier returns to flag position
-// MovingFlag state - soldier returns to flag position
 public class MovingFlagState : ISoldierState
 {
     private const float ARRIVAL_THRESHOLD = 0.04f;
     
     public void EnterState(Soldier soldier)
     {
+        Debug.Log("AABABABHAH");
         soldier.PlayRunAnimation(true);
         soldier.LookAtDirection(soldier.flagPos);
     }
 
+    // public void UpdateState(Soldier soldier)
+    // {
+    //  Debug.Log("AAAA");
+    //     soldier.transform.position = Vector2.MoveTowards(
+    //         soldier.transform.position,
+    //         soldier.flagPos,
+    //         soldier.MovementSpeed * Time.deltaTime
+    //     );
+    //     if (Vector2.Distance(soldier.transform.position, soldier.flagPos) <= ARRIVAL_THRESHOLD)
+    //     {
+    //         soldier.ChangeState(SoldierState.Idle);
+    //     }
+    // }
     public void UpdateState(Soldier soldier)
     {
-        // Move towards flag position regardless of monster targets
-        // This ensures the soldier always completes their movement to the flag
+        // Log the key values to understand what's happening
+        Debug.Log($"Current position: {soldier.transform.position}, Flag position: {soldier.flagPos}, " +
+                  $"Distance: {Vector2.Distance(soldier.transform.position, soldier.flagPos)}, " +
+                  $"Movement amount: {soldier.MovementSpeed * Time.deltaTime}");
+    
+        Vector2 oldPosition = soldier.transform.position;
+    
         soldier.transform.position = Vector2.MoveTowards(
             soldier.transform.position,
             soldier.flagPos,
             soldier.MovementSpeed * Time.deltaTime
         );
-        
-        // Only switch to idle when the flag position is reached
-        // Ignoring monster targets until the flag is reached
+    
+        // Check if position actually changed
+        if (oldPosition == (Vector2)soldier.transform.position)
+        {
+            Debug.LogWarning("Position did not change!");
+        }
+        else
+        {
+            Debug.Log($"Moved from {oldPosition} to {soldier.transform.position}");
+        }
+    
         if (Vector2.Distance(soldier.transform.position, soldier.flagPos) <= ARRIVAL_THRESHOLD)
         {
+            Debug.Log("Reached flag, changing to Idle state");
             soldier.ChangeState(SoldierState.Idle);
         }
     }
@@ -107,7 +126,6 @@ public class MovingFlagState : ISoldierState
     }
 }
 
-// Attack state - soldier attacks the monster
 public class AttackState : ISoldierState
 {
     private float _attackTimer = 0;
@@ -136,8 +154,7 @@ public class AttackState : ISoldierState
             soldier.monsterTarget.transform.position
         );
         
-        // If target moved out of range, chase it
-        if (distanceToTarget > soldier.attackRange * 1.1f)  // Small buffer to prevent oscillation
+        if (distanceToTarget > soldier.attackRange * 1.1f) 
         {
             soldier.ChangeState(SoldierState.Moving);
             return;
@@ -146,16 +163,12 @@ public class AttackState : ISoldierState
         _attackTimer += Time.deltaTime;
         if (_attackTimer >= _attackCooldown)
         {
-            // Deal damage
-            if (soldier.soldierSO != null && soldier.monsterTarget != null)
+            if (soldier.unitSO != null && soldier.monsterTarget != null)
             {
-                soldier.monsterTarget.TakeDamage(soldier.soldierSO.damage);
+                soldier.monsterTarget.TakeDamage(soldier.unitSO.attackDamage);
             }
             
-            // Play attack animation
             soldier.PlayAttackAnimation();
-            
-            // Reset timer
             _attackTimer = 0;
         }
     }

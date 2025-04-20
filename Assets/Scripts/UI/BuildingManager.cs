@@ -31,9 +31,7 @@ public class BuildingManager : MonoBehaviour
     [SerializeField] private UIBuidingSlot _uiBuidingSlotPrefab;
     [SerializeField] private Transform _uiBuildingSlotParent;
     [SerializeField] private Button flagBtn;
-    
-    [Header("Game Objects")]
-    [SerializeField] private GameObject flagPrefab;
+  
     [SerializeField] private SpriteRenderer map;
     
     [Header("Settings")]
@@ -46,12 +44,13 @@ public class BuildingManager : MonoBehaviour
     private GameObject _flagInstance;
     private Vector2 _mousePos;
     private BuildSpot _currentSelectedSpot;
-    private BaseTower _currentSelectedTower;
+    private Tower _currentSelectedTower;
     private Coroutine _flagCoroutine;
     #endregion
 
     #region Public Properties
-    public bool IsPlacingFlag { get; private set; }
+
+   [SerializeField] public bool IsPlacingFlag;
     #endregion
 
     private void Start()
@@ -128,45 +127,12 @@ public class BuildingManager : MonoBehaviour
     {
         if (_currentSelectedTower is Barracks barracks)
         {
-            barracks.OnFlagPlaced(_mousePos);
-            // StartCoroutine(AnimateFlagAppearance());
+            barracks.PutFlag(_mousePos);
             IsPlacingFlag = false;
         }
     }
 
-    private IEnumerator AnimateFlagAppearance()
-    {
-        if (_flagCoroutine != null)
-        {
-            StopCoroutine(_flagCoroutine);
-        }
-
-        if (_flagInstance == null)
-        {
-            _flagInstance = Instantiate(flagPrefab, _mousePos, Quaternion.identity);
-        }
-        else
-        {
-            _flagInstance.transform.position = _mousePos;
-            _flagInstance.SetActive(true);
-        }
-
-        SpriteRenderer spriteRenderer = _flagInstance.GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null)
-        {
-            // Fade in
-            spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 0);
-            yield return spriteRenderer.DOFade(1f, flagAnimationDuration).WaitForCompletion();
-            
-            // Hold
-            yield return new WaitForSeconds(flagAnimationDuration);
-            
-            // Fade out
-            yield return spriteRenderer.DOFade(0f, flagAnimationDuration).WaitForCompletion();
-        }
-
-        _flagInstance.SetActive(false);
-    }
+   
     #endregion
 
     #region Mouse Click Handling
@@ -184,7 +150,7 @@ public class BuildingManager : MonoBehaviour
         {
             SelectBuildingSpot(buildingSpot);
         }
-        else if (hit.collider.TryGetComponent<BaseTower>(out BaseTower tower))
+        else if (hit.collider.TryGetComponent<Tower>(out Tower tower))
         {
             SelectTower(tower);
         }
@@ -201,22 +167,30 @@ public class BuildingManager : MonoBehaviour
     {
         _currentSelectedSpot = buildingSpot;
         _currentSelectedTower = null;
-        ShowSelectionCircleAt(buildingSpot.transform.position);
+        ShowSelectionCircleAt(buildingSpot.transform.position,false);
         ShowBaseTowerOptions();
     }
 
-    private void SelectTower(BaseTower tower)
+    private void SelectTower(Tower tower)
     {
         _currentSelectedTower = tower;
         _currentSelectedSpot = null;
-        ShowSelectionCircleAt(tower.transform.position);
+        ShowSelectionCircleAt(tower.transform.position,tower is Barracks);
         ShowUpgradeOptions(tower.dataSO);
     }
     #endregion
 
     #region UI Visualization
-    private void ShowSelectionCircleAt(Vector2 worldPosition)
+    private void ShowSelectionCircleAt(Vector2 worldPosition, bool isBarrack)
     {
+        if (isBarrack)
+        {
+            flagBtn.gameObject.SetActive(true);
+        }
+        else
+        {
+            flagBtn.gameObject.SetActive(false);
+        }
         Vector2 screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvas.transform as RectTransform,
@@ -345,7 +319,7 @@ public class BuildingManager : MonoBehaviour
         }
 
         GameObject towerObj = Instantiate(towerData.prefab, position, Quaternion.identity);
-        BaseTower tower = towerObj.GetComponent<BaseTower>();
+        Tower tower = towerObj.GetComponent<Tower>();
         
         if (tower != null)
         {
