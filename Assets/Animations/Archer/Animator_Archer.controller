@@ -213,33 +213,25 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: aa84f0e2ab22b49c5a20f8c679248c48, type: 2}
+    m_Motion: {fileID: 7400000, guid: 57770f8420ab1439a9aeb386ec1e8baa, type: 2}
     m_Threshold: 0
-    m_Position: {x: 0.261, y: -0.274}
+    m_Position: {x: 0, y: 1}
+    m_TimeScale: 1
+    m_CycleOffset: 0
+    m_DirectBlendParameter: Blend
+    m_Mirror: 0
+  - serializedVersion: 2
+    m_Motion: {fileID: 7400000, guid: aa84f0e2ab22b49c5a20f8c679248c48, type: 2}
+    m_Threshold: 0.25
+    m_Position: {x: 0, y: -1}
     m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
     m_Motion: {fileID: 7400000, guid: b32e0e3d4426e4d77aad29d5afc70e87, type: 2}
-    m_Threshold: 0.33333334
-    m_Position: {x: 0.325, y: -0.002}
-    m_TimeScale: 1
-    m_CycleOffset: 0
-    m_DirectBlendParameter: Blend
-    m_Mirror: 0
-  - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: a36bfdaf20ecc46159d98a690da3dd57, type: 2}
-    m_Threshold: 0.6666667
-    m_Position: {x: 0.227, y: 0.397}
-    m_TimeScale: 1
-    m_CycleOffset: 0
-    m_DirectBlendParameter: Blend
-    m_Mirror: 0
-  - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 2052134ac26c74271a4ea8f6b3c92bf0, type: 2}
-    m_Threshold: 1
-    m_Position: {x: -0.189, y: -0.322}
+    m_Threshold: 0.5
+    m_Position: {x: 1, y: 0}
     m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: Blend
@@ -247,7 +239,7 @@ BlendTree:
   m_BlendParameter: DirX
   m_BlendParameterY: DirY
   m_MinThreshold: 0
-  m_MaxThreshold: 1
+  m_MaxThreshold: 0.5
   m_UseAutomaticThresholds: 1
   m_NormalizedBlendValues: 0
   m_BlendType: 1
@@ -410,7 +402,7 @@ AnimatorStateMachine:
     m_Position: {x: 480, y: 520, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -7938175840654788288}
-    m_Position: {x: 515, y: 585, z: 0}
+    m_Position: {x: 520, y: 580, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -9137017932029547610}
     m_Position: {x: 250, y: -20, z: 0}
@@ -442,11 +434,11 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0
   m_TransitionOffset: 0
-  m_ExitTime: 0.75
-  m_HasExitTime: 0
-  m_HasFixedDuration: 1
+  m_ExitTime: 0.9
+  m_HasExitTime: 1
+  m_HasFixedDuration: 0
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1

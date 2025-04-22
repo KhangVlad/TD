@@ -34,7 +34,7 @@ public class MovingState : ISoldierState
         soldier.PlayRunAnimation(true);
         if (soldier.monsterTarget != null)
         {
-            soldier.LookAtDirection(soldier.monsterTarget.transform.position);
+            soldier.LookAtTarget(soldier.monsterTarget.transform.position);
         }
     }
 
@@ -72,29 +72,11 @@ public class MovingFlagState : ISoldierState
     {
         Debug.Log("AABABABHAH");
         soldier.PlayRunAnimation(true);
-        soldier.LookAtDirection(soldier.flagPos);
+        soldier.LookAtTarget(soldier.flagPos);
     }
-
-    // public void UpdateState(Soldier soldier)
-    // {
-    //  Debug.Log("AAAA");
-    //     soldier.transform.position = Vector2.MoveTowards(
-    //         soldier.transform.position,
-    //         soldier.flagPos,
-    //         soldier.MovementSpeed * Time.deltaTime
-    //     );
-    //     if (Vector2.Distance(soldier.transform.position, soldier.flagPos) <= ARRIVAL_THRESHOLD)
-    //     {
-    //         soldier.ChangeState(SoldierState.Idle);
-    //     }
-    // }
     public void UpdateState(Soldier soldier)
     {
-        // Log the key values to understand what's happening
-        Debug.Log($"Current position: {soldier.transform.position}, Flag position: {soldier.flagPos}, " +
-                  $"Distance: {Vector2.Distance(soldier.transform.position, soldier.flagPos)}, " +
-                  $"Movement amount: {soldier.MovementSpeed * Time.deltaTime}");
-    
+       
         Vector2 oldPosition = soldier.transform.position;
     
         soldier.transform.position = Vector2.MoveTowards(
@@ -106,16 +88,10 @@ public class MovingFlagState : ISoldierState
         // Check if position actually changed
         if (oldPosition == (Vector2)soldier.transform.position)
         {
-            Debug.LogWarning("Position did not change!");
         }
-        else
-        {
-            Debug.Log($"Moved from {oldPosition} to {soldier.transform.position}");
-        }
-    
+      
         if (Vector2.Distance(soldier.transform.position, soldier.flagPos) <= ARRIVAL_THRESHOLD)
         {
-            Debug.Log("Reached flag, changing to Idle state");
             soldier.ChangeState(SoldierState.Idle);
         }
     }
@@ -137,7 +113,7 @@ public class AttackState : ISoldierState
         if (soldier.monsterTarget != null)
         {
             soldier.monsterTarget.SetSoldierTarget(soldier);
-            soldier.LookAtDirection(soldier.monsterTarget.transform.position);
+            soldier.LookAtTarget(soldier.monsterTarget.transform.position);
         }
     }
 

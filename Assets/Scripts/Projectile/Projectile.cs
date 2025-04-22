@@ -1,129 +1,87 @@
 using System.Collections;
 using UnityEngine;
 
-public class Projectile : MonoBehaviour
+// Abstract base class for all projectiles
+public abstract class Projectile : MonoBehaviour
 {
-    private Transform target;
-    private float damage;
-    private float speed;
-    private float lifetime;
-    
-    // Bezier curve height
-    private float arcHeight = 2f;
-    
-    // Reference to the coroutine
-    private Coroutine flightCoroutine;
+    protected Transform target;
+    protected float damage;
+    protected float speed;
+    protected float lifetime;
+    protected Coroutine flightCoroutine;
 
-    public void Initialize(Transform target, float damage, float speed, float lifetime)
+    // Store the projectile ID for pool management
+    public ProjectileID id = ProjectileID.None;
+
+    // Common initialization method for all projectiles
+    public virtual void Initialize(Transform target, float damage, float speed, float lifetime)
     {
         this.target = target;
         this.damage = damage;
         this.speed = speed;
         this.lifetime = lifetime;
-        
-        // Start flight coroutine
+
+        // Start flight behavior
         if (target != null)
         {
-            flightCoroutine = StartCoroutine(BezierFlight());
+            BeginFlight();
         }
         else
         {
-            Destroy(gameObject);
+            ReturnToPool();
         }
     }
-    private IEnumerator BezierFlight()
-    {
-        Vector3 startPos = transform.position;
-        float startTime = Time.time;
-        float fixedDuration = 0.3f; // Fixed duration of 1 second
-    
-        // Calculate the initial distance to determine arc height
-        float distanceToTarget = Vector3.Distance(startPos, target.position);
-        float dynamicArcHeight = arcHeight * (distanceToTarget / 10f); // Scale arc height based on distance
-    
-        // Continue until we hit the target or exceed lifetime
-        while (Time.time - startTime < Mathf.Min(fixedDuration, lifetime) && target != null)
-        {
-            // Calculate progress based on fixed duration
-            float timeProgress = (Time.time - startTime) / fixedDuration;
-        
-            if (timeProgress >= 1.0f)
-            {
-                // We've reached the target
-                HitTarget();
-                yield break;
-            }
-        
-            // Generate a midpoint for the bezier curve
-            Vector3 midPoint = Vector3.Lerp(startPos, target.position, 0.5f);
-            midPoint.y += dynamicArcHeight; // Add height for the arc, scaled by distance
-        
-            // Calculate position along the Bezier curve
-            Vector3 newPosition = QuadraticBezier(startPos, midPoint, target.position, timeProgress);
-            transform.position = newPosition;
-        
-            // Calculate direction for rotation
-            if (timeProgress < 0.95f) // Don't change rotation right at the end
-            {
-                Vector3 nextPosition = QuadraticBezier(startPos, midPoint, target.position, timeProgress + 0.05f);
-                Vector3 direction = (nextPosition - newPosition).normalized;
-            
-                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-            }
-        
-            yield return null;
-        }
-    
-        // If we've reached here, either target was destroyed or lifetime expired
-        Destroy(gameObject);
-    }
-    
-    // Quadratic Bezier curve formula
-    private Vector3 QuadraticBezier(Vector3 p0, Vector3 p1, Vector3 p2, float t)
-    {
-        float u = 1 - t;
-        float tt = t * t;
-        float uu = u * u;
-        
-        Vector3 point = uu * p0; // (1-t)² * P0
-        point += 2 * u * t * p1; // 2(1-t)t * P1
-        point += tt * p2; // t² * P2
-        
-        return point;
-    }
-    
-    private void HitTarget()
+
+    // Abstract method to be implemented by derived classes
+    protected abstract void BeginFlight();
+
+    // Common method to handle hitting the target
+    protected virtual void HitTarget()
     {
         if (target == null)
         {
-            Destroy(gameObject);
+            ReturnToPool();
             return;
         }
-        
+
         // Apply damage to monster
         Monster monster = target.GetComponent<Monster>();
         if (monster != null)
         {
             monster.TakeDamage(damage);
         }
-        
-        // Destroy arrow after hit
-        Destroy(gameObject);
+
+        // Return projectile to pool after hit
+        ReturnToPool();
     }
-    
-    private void OnDestroy()
+
+    // Return this projectile to the pool instead of destroying it
+    protected virtual void ReturnToPool()
     {
-        // Make sure to stop the coroutine if the object is destroyed
+        // Stop any running coroutines
+        if (flightCoroutine != null)
+        {
+            StopCoroutine(flightCoroutine);
+            flightCoroutine = null;
+        }
+
+        ProjectileManager.Instance.ReturnProjectile(this);
+    }
+
+    protected virtual void OnDestroy()
+    {
+        // Make sure to stop any coroutines if the object is destroyed
         if (flightCoroutine != null)
         {
             StopCoroutine(flightCoroutine);
         }
     }
-    
-    // Optional: Adjust arc height
-    public void SetArcHeight(float height)
-    {
-        arcHeight = height;
-    }
+}
+
+// Enum for projectile types
+public enum ProjectileID
+{
+    None = -1, // Default value for unassigned projectiles
+    Arrow = 0,
+    MagicBullet = 1,
 }

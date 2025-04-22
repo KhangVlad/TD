@@ -39,7 +39,6 @@ public class ArcherAttackState : IArcherState
 
     public void EnterState(Archer archer)
     {
-        Debug.Log("AAAA"+archer.unitSO.attackSpeed);
         _attackTimer = 0;
         if (archer.monsterTarget != null)
         {
@@ -62,9 +61,7 @@ public class ArcherAttackState : IArcherState
             {
                 // Play animation and fire arrow
                 archer.PlayAttackAnimation();
-                archer.FireArrow();
-            
-                // Reset timer
+                // archer.FireArrow();
                 _attackTimer = 0;
                 
             }   

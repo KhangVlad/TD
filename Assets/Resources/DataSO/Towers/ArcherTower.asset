@@ -25,6 +25,6 @@ MonoBehaviour:
   damage: 0
   maxUnits: 3
   spawnTime: 5
-  soldierPrefab: {fileID: 5747856235600934807, guid: 775c490dad8dc4cd69dd67a3afaef72c, type: 3}
+  soldierPrefab: {fileID: 7957457229425702434, guid: 4ec26e74905e849b8bc94ac7a33bae2d, type: 3}
   soldierData: {fileID: 11400000, guid: dcab0cee1628f479daf97007a2fa6368, type: 2}
   possibleUpgrades: 

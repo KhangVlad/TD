@@ -75,14 +75,37 @@ public abstract class Unit : MonoBehaviour
         // Override in derived classes to handle specific cleanup
     }
 
-    public virtual void LookAtDirection(Vector2 targetPosition)
+    // public virtual void LookAtDirection(Vector2 targetPosition)
+    // {
+    //     if (targetPosition.x < transform.position.x)
+    //         unitSprite.flipX = true;
+    //     else
+    //         unitSprite.flipX = false;
+    // }
+    public virtual void LookAtDirection(Vector2 direction)
     {
-        if (targetPosition.x < transform.position.x)
-            unitSprite.flipX = true;
+        // If direction.x is negative, we want to look left (flip sprite)
+        // If direction.x is positive, we want to look right (no flip)
+        if (direction.x < 0)
+            // unitSprite.flipX = true;
+            transform.localScale = new Vector3(-1, 1, 1); 
         else
-            unitSprite.flipX = false;
+            // unitSprite.flipX = false;
+            transform.localScale = new Vector3(1, 1, 1); 
     }
-
+    public virtual void LookAtTarget(Vector2 targetPosition)
+    {
+        Vector2 direction = new Vector2(
+            targetPosition.x - transform.position.x,
+            targetPosition.y - transform.position.y
+        ).normalized;
+    
+        // Handle X direction (left/right flipping)
+        if (direction.x < 0)
+            transform.localScale = new Vector3(-1, 1, 1);
+        else
+            transform.localScale = new Vector3(1, 1, 1);  
+    }
     // Abstract methods for state machine - each unit type implements these
     protected abstract void InitializeStateMachine();
     protected abstract void UpdateStateMachine();
@@ -92,7 +115,7 @@ public abstract class Unit : MonoBehaviour
     public virtual void PlayAttackAnimation()
     {
         anim.SetTrigger("Attack");
-        anim.SetFloat("Blend", UnityEngine.Random.Range(0f, 1f));
+      
     }
 
     public virtual void PlayRunAnimation(bool active)
