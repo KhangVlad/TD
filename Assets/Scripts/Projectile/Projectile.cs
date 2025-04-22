@@ -9,7 +9,7 @@ public class Projectile : MonoBehaviour
     private float lifetime;
     
     // Bezier curve height
-    private float arcHeight = 1.5f;
+    private float arcHeight = 2f;
     
     // Reference to the coroutine
     private Coroutine flightCoroutine;
@@ -31,54 +31,6 @@ public class Projectile : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    
-    // private IEnumerator BezierFlight()
-    // {
-    //     Vector3 startPos = transform.position;
-    //     float startTime = Time.time;
-    //     
-    //     // Continue until we hit the target or exceed lifetime
-    //     while (Time.time - startTime < lifetime && target != null)
-    //     {
-    //         // Calculate how far along the path we are (0 to 1)
-    //         float distanceToTarget = Vector3.Distance(startPos, target.position);
-    //         float journeyLength = distanceToTarget;
-    //         float speedFactor = speed / journeyLength;
-    //         
-    //         // Calculate progress based on time and speed
-    //         float timeProgress = (Time.time - startTime) * speedFactor;
-    //         
-    //         if (timeProgress >= 1.0f)
-    //         {
-    //             // We've reached the target
-    //             HitTarget();
-    //             yield break;
-    //         }
-    //         
-    //         // Generate a midpoint for the bezier curve
-    //         Vector3 midPoint = Vector3.Lerp(startPos, target.position, 0.5f);
-    //         midPoint.y += arcHeight; // Add height for the arc
-    //         
-    //         // Calculate position along the Bezier curve
-    //         Vector3 newPosition = QuadraticBezier(startPos, midPoint, target.position, timeProgress);
-    //         transform.position = newPosition;
-    //         
-    //         // Calculate direction for rotation
-    //         if (timeProgress < 0.95f) // Don't change rotation right at the end
-    //         {
-    //             Vector3 nextPosition = QuadraticBezier(startPos, midPoint, target.position, timeProgress + 0.05f);
-    //             Vector3 direction = (nextPosition - newPosition).normalized;
-    //             
-    //             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-    //             transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-    //         }
-    //         
-    //         yield return null;
-    //     }
-    //     
-    //     // If we've reached here, either target was destroyed or lifetime expired
-    //     Destroy(gameObject);
-    // }
     private IEnumerator BezierFlight()
     {
         Vector3 startPos = transform.position;
