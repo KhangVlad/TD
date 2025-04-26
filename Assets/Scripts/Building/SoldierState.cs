@@ -45,14 +45,16 @@ public class MovingState : ISoldierState
             soldier.ChangeState(SoldierState.MovingFlag);
             return;
         }
+
         soldier.transform.position = Vector2.MoveTowards(
             soldier.transform.position,
             soldier.monsterTarget.transform.position,
             soldier.MovementSpeed * Time.deltaTime
         );
-        
+
         // If within attack range, switch to attacking state
-        if (Vector2.Distance(soldier.transform.position, soldier.monsterTarget.transform.position) <= soldier.attackRange)
+        if (Vector2.Distance(soldier.transform.position, soldier.monsterTarget.transform.position) <=
+            soldier.attackRange)
         {
             soldier.ChangeState(SoldierState.Attacking);
         }
@@ -67,29 +69,29 @@ public class MovingState : ISoldierState
 public class MovingFlagState : ISoldierState
 {
     private const float ARRIVAL_THRESHOLD = 0.04f;
-    
+
     public void EnterState(Soldier soldier)
     {
         Debug.Log("AABABABHAH");
         soldier.PlayRunAnimation(true);
         soldier.LookAtTarget(soldier.flagPos);
     }
+
     public void UpdateState(Soldier soldier)
     {
-       
         Vector2 oldPosition = soldier.transform.position;
-    
+
         soldier.transform.position = Vector2.MoveTowards(
             soldier.transform.position,
             soldier.flagPos,
             soldier.MovementSpeed * Time.deltaTime
         );
-    
+
         // Check if position actually changed
         if (oldPosition == (Vector2)soldier.transform.position)
         {
         }
-      
+
         if (Vector2.Distance(soldier.transform.position, soldier.flagPos) <= ARRIVAL_THRESHOLD)
         {
             soldier.ChangeState(SoldierState.Idle);
@@ -105,7 +107,6 @@ public class MovingFlagState : ISoldierState
 public class AttackState : ISoldierState
 {
     private float _attackTimer = 0;
-    private float _attackCooldown = 1.5f;
 
     public void EnterState(Soldier soldier)
     {
@@ -122,30 +123,31 @@ public class AttackState : ISoldierState
         if (soldier.monsterTarget == null)
         {
             soldier.ChangeState(SoldierState.MovingFlag);
-            return;
         }
+        else
+        {
+            float distanceToTarget = Vector2.Distance(
+                soldier.transform.position,
+                soldier.monsterTarget.transform.position
+            );
 
-        float distanceToTarget = Vector2.Distance(
-            soldier.transform.position, 
-            soldier.monsterTarget.transform.position
-        );
-        
-        if (distanceToTarget > soldier.attackRange * 1.1f) 
-        {
-            soldier.ChangeState(SoldierState.Moving);
-            return;
-        }
-        
-        _attackTimer += Time.deltaTime;
-        if (_attackTimer >= _attackCooldown)
-        {
-            if (soldier.unitSO != null && soldier.monsterTarget != null)
+            if (distanceToTarget > soldier.attackRange * 1.1f)
             {
-                soldier.monsterTarget.TakeDamage(soldier.unitSO.attackDamage);
+                soldier.ChangeState(SoldierState.Moving);
+                return;
             }
-            
-            soldier.PlayAttackAnimation();
-            _attackTimer = 0;
+
+            _attackTimer += Time.deltaTime;
+            if (_attackTimer >= soldier.unitSO.attackSpeed)
+            {
+                if (soldier.unitSO != null && soldier.monsterTarget != null)
+                {
+                    soldier.monsterTarget.TakeDamage(soldier.unitSO.attackDamage);
+                }
+
+                soldier.PlayAttackAnimation();
+                _attackTimer = 0;
+            }
         }
     }
 

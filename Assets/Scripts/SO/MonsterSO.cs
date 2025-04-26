@@ -40,5 +40,5 @@ public enum MonsterType
     Zombie = 3,
     Ghost = 4,
     Dragon = 5,
-    Boss = 6
+    Boss = 6,
 }

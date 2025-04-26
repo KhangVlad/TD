@@ -55,7 +55,7 @@ public class ArcherTower : Tower
         }
     }
 
-    private void UpdateSoldierTargets(Monster entranceMonster)
+    private void UpdateSoldierTargets(MonsterBase entranceMonster)
     {
         _monstersInArea.RemoveAll(monster => monster == null);
     
@@ -72,12 +72,12 @@ public class ArcherTower : Tower
         }
     }
 
-    protected override void OnMonsterEnterArea(Monster monster)
+    protected override void OnMonsterEnterArea(MonsterBase monster)
     {
         UpdateSoldierTargets(monster);
     }
 
-    protected override void OnMonsterExitArea(Monster monster)
+    protected override void OnMonsterExitArea(MonsterBase monster)
     {
         if (monster != null)
         {
@@ -96,7 +96,7 @@ public class ArcherTower : Tower
 public class ArcherWithTarget
 {
     public Archer soldier;
-    public Monster monster;
+    public MonsterBase monster;
 
     public ArcherWithTarget(Archer s)
     {
@@ -104,7 +104,7 @@ public class ArcherWithTarget
         monster = null;
     }
 
-    public void SetTarget(Monster m)
+    public void SetTarget(MonsterBase m)
     {
         monster = m;
         soldier.ChangeTarget(m);

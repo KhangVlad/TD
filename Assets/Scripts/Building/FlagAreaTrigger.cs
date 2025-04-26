@@ -76,7 +76,7 @@ public class FlagAreaTrigger : MonoBehaviour
             }
         }
 
-        Monster monster = other.GetComponent<Monster>();
+        MonsterBase monster = other.GetComponent<MonsterBase>();
         if (monster != null)
         {
             _parentBarracks.AddMonsterToArea(monster);
@@ -90,7 +90,7 @@ public class FlagAreaTrigger : MonoBehaviour
             return;
         }
 
-        Monster monster = other.GetComponent<Monster>();
+        MonsterBase monster = other.GetComponent<MonsterBase>();
         if (monster != null)
         {
             _parentBarracks.RemoveMonsterFromArea(monster);

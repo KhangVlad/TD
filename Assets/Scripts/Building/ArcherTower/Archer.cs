@@ -198,7 +198,7 @@ public class Archer : Unit
         }
     }
 
-    protected override void HandleTargetChange(Monster target)
+    protected override void HandleTargetChange(MonsterBase target)
     {
         if (target != null)
         {

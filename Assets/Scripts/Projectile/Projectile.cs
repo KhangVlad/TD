@@ -45,7 +45,7 @@ public abstract class Projectile : MonoBehaviour
         }
 
         // Apply damage to monster
-        Monster monster = target.GetComponent<Monster>();
+        MonsterBase monster = target.GetComponent<MonsterBase>();
         if (monster != null)
         {
             monster.TakeDamage(damage);

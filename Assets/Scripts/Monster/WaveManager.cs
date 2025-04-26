@@ -89,6 +89,10 @@ public class WaveManager : MonoBehaviour
         {
             SpawnMonster(MonsterType.Goblin);
         }
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            SpawnMonster(MonsterType.Skeleton);
+        }
     }
 
     /// <summary>

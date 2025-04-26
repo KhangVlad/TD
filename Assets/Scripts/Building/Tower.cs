@@ -15,7 +15,7 @@ public abstract class Tower : MonoBehaviour, ITower
     [Header("Flag Settings")]
     [SerializeField] protected float flagDetectRange = 1f;
     
-    public List<Monster> _monstersInArea = new List<Monster>();
+    public List<MonsterBase> _monstersInArea = new List<MonsterBase>();
     protected Vector2 flagPosition;
     protected Coroutine flagCoroutine;
     protected FlagAreaTrigger _flagAreaCollider;
@@ -136,7 +136,7 @@ public abstract class Tower : MonoBehaviour, ITower
     //     Gizmos.DrawWireSphere(transform.position, _flagAreaCollider.colliderRange);
     // }
     
-    public void AddMonsterToArea(Monster monster)
+    public void AddMonsterToArea(MonsterBase monster)
     {
         if (monster != null && !_monstersInArea.Contains(monster))
         {
@@ -146,7 +146,7 @@ public abstract class Tower : MonoBehaviour, ITower
         }
     }
     
-    public void RemoveMonsterFromArea(Monster monster)
+    public void RemoveMonsterFromArea(MonsterBase monster)
     {
         if (monster != null)
         {
@@ -154,12 +154,12 @@ public abstract class Tower : MonoBehaviour, ITower
             OnMonsterExitArea(monster);
         }
     }
-    protected virtual void OnMonsterEnterArea(Monster monster)
+    protected virtual void OnMonsterEnterArea(MonsterBase monster)
     {
        
     }
 
-    protected virtual void OnMonsterExitArea(Monster monster)
+    protected virtual void OnMonsterExitArea(MonsterBase monster)
     {
         _monstersInArea.Remove(monster);
     }

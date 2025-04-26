@@ -61,7 +61,7 @@ public class Soldier : Unit
         }
     }
 
-    protected override void HandleTargetChange(Monster target)
+    protected override void HandleTargetChange(MonsterBase target)
     {
         if (target != null)
         {
@@ -115,15 +115,14 @@ public class Soldier : Unit
     // Flag position change handler
     private void OnFlagPositionChanged(Vector2 newFlagPos)
     {
-        // Update flag position
         flagPos = newFlagPos + offsetWithFlag;
         ChangeState(SoldierState.MovingFlag);
     }
     
     public override void PlayAttackAnimation()
     {
-        base.PlayAttackAnimation();
         anim.SetFloat("Blend", UnityEngine.Random.Range(0f, 1f));
+        base.PlayAttackAnimation();
     }
 }
 

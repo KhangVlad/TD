@@ -139,7 +139,7 @@ public class Barracks : Tower
 
     #region Monster Targeting
 
-    private void UpdateSoldierTargets(Monster entranceMonster)
+    private void UpdateSoldierTargets(MonsterBase entranceMonster)
     {
         _monstersInArea.RemoveAll(monster => monster == null);
         UpdateSoldierCount();
@@ -168,12 +168,12 @@ public class Barracks : Tower
             DistributeSoldiersToMonsters(activeSoldiers, entranceMonster);
         }
     }
-        protected override void OnMonsterEnterArea(Monster monster)
+        protected override void OnMonsterEnterArea(MonsterBase monster)
     {
         UpdateSoldierTargets(monster);
     }
 
-    protected override void OnMonsterExitArea(Monster monster)
+    protected override void OnMonsterExitArea(MonsterBase monster)
     {
         if (monster != null)
         {
@@ -195,9 +195,9 @@ public class Barracks : Tower
         }
     }
 
-    private void AssignOneMonsterPerSoldier(List<SoldierWithTarget> soldiers, Monster entranceMonster)
+    private void AssignOneMonsterPerSoldier(List<SoldierWithTarget> soldiers, MonsterBase entranceMonster)
     {
-        List<Monster> availableMonsters = new List<Monster>(_monstersInArea);
+        List<MonsterBase> availableMonsters = new List<MonsterBase>(_monstersInArea);
         
         if (entranceMonster != null && availableMonsters.Contains(entranceMonster))
         {
@@ -207,13 +207,13 @@ public class Barracks : Tower
             {
                 if (availableMonsters.Count > 0)
                 {
-                    Monster target = availableMonsters[0];
+                    MonsterBase target = availableMonsters[0];
                     soldiers[i].SetTarget(target);
                     availableMonsters.RemoveAt(0);
                 }
                 else
                 {
-                    Monster target = _monstersInArea[i % _monstersInArea.Count];
+                    MonsterBase target = _monstersInArea[i % _monstersInArea.Count];
                     soldiers[i].SetTarget(target);
                 }
             }
@@ -234,7 +234,7 @@ public class Barracks : Tower
         }
     }
 
-    private void DistributeSoldiersToMonsters(List<SoldierWithTarget> soldiers, Monster entranceMonster)
+    private void DistributeSoldiersToMonsters(List<SoldierWithTarget> soldiers, MonsterBase entranceMonster)
     {
         int soldiersPerMonster = Mathf.Max(1, soldiers.Count / _monstersInArea.Count);
         int currentMonsterIndex = 0;
@@ -246,12 +246,12 @@ public class Barracks : Tower
                 soldiers[currentSoldierIndex].SetTarget(entranceMonster);
                 currentSoldierIndex++;
             }
-            List<Monster> remainingMonsters = new List<Monster>(_monstersInArea);
+            List<MonsterBase> remainingMonsters = new List<MonsterBase>(_monstersInArea);
             remainingMonsters.Remove(entranceMonster);
             
             while (currentSoldierIndex < soldiers.Count && remainingMonsters.Count > 0)
             {
-                Monster currentMonster = remainingMonsters[currentMonsterIndex];
+                MonsterBase currentMonster = remainingMonsters[currentMonsterIndex];
                 
                 for (int i = 0; i < soldiersPerMonster && currentSoldierIndex < soldiers.Count; i++)
                 {
@@ -276,7 +276,7 @@ public class Barracks : Tower
             // No entrance monster, distribute evenly
             for (int i = 0; i < soldiers.Count; i++)
             {
-                Monster target = _monstersInArea[currentMonsterIndex];
+                MonsterBase target = _monstersInArea[currentMonsterIndex];
                 soldiers[i].SetTarget(target);
                 
                 // Move to next monster after assigning soldiersPerMonster
@@ -305,7 +305,7 @@ public class Barracks : Tower
 public class SoldierWithTarget
 {
     public Soldier soldier;
-    public Monster monster;
+    public MonsterBase monster;
 
     public SoldierWithTarget(Soldier s)
     {
@@ -313,7 +313,7 @@ public class SoldierWithTarget
         monster = null;
     }
 
-    public void SetTarget(Monster m)
+    public void SetTarget(MonsterBase m)
     {
         monster = m;
         soldier.ChangeTarget(m);

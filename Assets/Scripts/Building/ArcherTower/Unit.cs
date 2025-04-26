@@ -12,7 +12,7 @@ public abstract class Unit : MonoBehaviour
     public UnitSO unitSO;
 
     // Common state tracking
-    public Monster monsterTarget;
+    public MonsterBase monsterTarget;
 
     // Combat stats
     public float attackRange;
@@ -29,13 +29,10 @@ public abstract class Unit : MonoBehaviour
 
     protected virtual void OnDestroy()
     {
-        // Clean up health bar
         if (_healthBar != null && UIHealthBarManager.Instance != null)
         {
             UIHealthBarManager.Instance.ReleaseHealthBar(_healthBar);
         }
-
-        // Make sure monster no longer follows this unit
         if (monsterTarget != null)
         {
             CleanupMonsterTarget();
@@ -57,9 +54,9 @@ public abstract class Unit : MonoBehaviour
         }
     }
 
-    public virtual void ChangeTarget(Monster target)
+    public virtual void ChangeTarget(MonsterBase target)
     {
-        Monster old = monsterTarget;
+        MonsterBase old = monsterTarget;
         if(old != null)
         {
             CleanupMonsterTarget();
@@ -68,29 +65,18 @@ public abstract class Unit : MonoBehaviour
         HandleTargetChange(target);
     }
 
-    protected abstract void HandleTargetChange(Monster target);
+    protected abstract void HandleTargetChange(MonsterBase target);
 
     protected virtual void CleanupMonsterTarget()
     {
-        // Override in derived classes to handle specific cleanup
+       
     }
 
-    // public virtual void LookAtDirection(Vector2 targetPosition)
-    // {
-    //     if (targetPosition.x < transform.position.x)
-    //         unitSprite.flipX = true;
-    //     else
-    //         unitSprite.flipX = false;
-    // }
     public virtual void LookAtDirection(Vector2 direction)
     {
-        // If direction.x is negative, we want to look left (flip sprite)
-        // If direction.x is positive, we want to look right (no flip)
         if (direction.x < 0)
-            // unitSprite.flipX = true;
             transform.localScale = new Vector3(-1, 1, 1); 
         else
-            // unitSprite.flipX = false;
             transform.localScale = new Vector3(1, 1, 1); 
     }
     public virtual void LookAtTarget(Vector2 targetPosition)
@@ -99,14 +85,11 @@ public abstract class Unit : MonoBehaviour
             targetPosition.x - transform.position.x,
             targetPosition.y - transform.position.y
         ).normalized;
-    
-        // Handle X direction (left/right flipping)
         if (direction.x < 0)
             transform.localScale = new Vector3(-1, 1, 1);
         else
             transform.localScale = new Vector3(1, 1, 1);  
     }
-    // Abstract methods for state machine - each unit type implements these
     protected abstract void InitializeStateMachine();
     protected abstract void UpdateStateMachine();
 

@@ -1,39 +1,38 @@
 using UnityEngine;
 public interface IMonsterState
 {
-    void EnterState(Monster monster);
-    void UpdateState(Monster monster);
-    void ExitState(Monster monster);
+    void EnterState(MonsterBase monster);
+    void UpdateState(MonsterBase monster);
+    void ExitState(MonsterBase monster);
 }
-
-// Moving state implementation
 public class MonsterMovingState : IMonsterState
 {
     private Vector3 targetNodePosition;
     private bool isTargetNodeCached = false;
 
-    public void EnterState(Monster monster)
+    public void EnterState(MonsterBase monster)
     {
         isTargetNodeCached = false;
     }
 
-    public void UpdateState(Monster monster)
+    public void UpdateState(MonsterBase monster)
     {
         if (monster.targetSoldier != null)
         {
+            // Look at soldier when chasing
+            monster.LookAtTarget(monster.targetSoldier.transform.position);
+            
             if (Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position) <= monster.attackRange)
             {
                 monster.ChangeState(MonsterState.Attack);
                 return;
             }
             
-            // Otherwise, move toward the soldier
             monster.transform.position = Vector2.MoveTowards(
                 monster.transform.position,
                 monster.targetSoldier.transform.position + new Vector3(0.1f, 0.1f, 0),
                 monster.Speed * Time.deltaTime);
                 
-            // Check again if we've reached attack range
             if (Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position) <= monster.attackRange)
             {
                 monster.ChangeState(MonsterState.Attack);
@@ -52,7 +51,13 @@ public class MonsterMovingState : IMonsterState
             {
                 targetNodePosition = MonsterManager.Instance.GetNodePosition(monster.currentNodeIndex);
                 isTargetNodeCached = true;
+                
+                // Update orientation when getting a new target node
+                monster.UpdatePathNode(targetNodePosition);
             }
+
+            // Look at target while moving
+            monster.LookAtTarget(targetNodePosition);
 
             // Move toward target node
             monster.transform.position = Vector3.MoveTowards(
@@ -78,24 +83,23 @@ public class MonsterMovingState : IMonsterState
         }
     }
 
-    public void ExitState(Monster monster)
+    public void ExitState(MonsterBase monster)
     {
-        // Nothing special needed when exiting moving state
     }
 }
 
-// Attacking state for when a soldier is detected
 public class MonsterAttackingState : IMonsterState
 {
     private float _attackTimer = 0;
     private float _attackCooldown = 1;
+    private static readonly int Attack = Animator.StringToHash("Attack");
 
-    public void EnterState(Monster monster)
+    public void EnterState(MonsterBase monster)
     {
         _attackTimer = 0;
     }
 
-    public void UpdateState(Monster monster)
+    public void UpdateState(MonsterBase monster)
     {
         if (monster.targetSoldier == null)
         {
@@ -103,57 +107,58 @@ public class MonsterAttackingState : IMonsterState
             return;
         }
         
+        monster.LookAtTarget(monster.targetSoldier.transform.position);
+        
         float distanceToSoldier = Vector2.Distance(monster.transform.position, monster.targetSoldier.transform.position);
         
-        // If we're in attack range, attack on a timer
         if (distanceToSoldier <= monster.attackRange)
         {
             _attackTimer += Time.deltaTime;
             if (_attackTimer >= _attackCooldown)
             {
-                // Attack the soldier (damage would be applied here)
-                // TODO: Add soldier damage implementation
+                Animator animator = monster.GetComponent<Animator>();
+                if (animator != null)
+                {
+                    animator.SetTrigger(Attack);
+                }
                 
-                // Play attack animation or effect here if available
+                if (monster.targetSoldier != null)
+                {
+                }
                 
                 _attackTimer = 0;
             }
         }
-        // If the soldier moved too far away, go back to chasing
         else if (distanceToSoldier > monster.attackRange * 1.5f)
         {
             monster.ChangeState(MonsterState.Moving);
         }
     }
 
-    public void ExitState(Monster monster)
+    public void ExitState(MonsterBase monster)
     {
-        // Nothing special needed when exiting attack state
+        // Reset attack animation if needed
+        Animator animator = monster.GetComponent<Animator>();
+        if (animator != null)
+        {
+            animator.ResetTrigger(Attack);
+        }
     }
 }
 
 public class PathCompleteState : IMonsterState
 {
-    public void EnterState(Monster monster)
+    public void EnterState(MonsterBase monster)
     {
-        // // Clean up any soldier references
-        // if (monster.targetSoldier != null)
-        // {
-        //     monster.targetSoldier = null;
-        // }
-        //
-        MonsterManager.Instance.RemoveMonster(monster);
         monster.OnPathComplete();
     }
 
-    public void UpdateState(Monster monster)
+    public void UpdateState(MonsterBase monster)
     {
-        // Nothing to update in this state as the monster will be destroyed
     }
 
-    public void ExitState(Monster monster)
+    public void ExitState(MonsterBase monster)
     {
-        // This won't be called as the monster is destroyed in EnterState
     }
 }
 

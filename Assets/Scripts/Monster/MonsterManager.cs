@@ -23,10 +23,11 @@ public class MonsterManager : MonoBehaviour
     public List<PathNode> mainPath = new List<PathNode>();
     
     [Header("Monster Configuration")]
-    [SerializeField] private Monster monsterPrefab;
+    [SerializeField] private MonsterBase monsterPrefab;
+    [SerializeField] private MonsterBase skeletonPrefab;
     [SerializeField] private Transform monsterContainer;
     
-    private List<Monster> activeMonsters = new List<Monster>();
+    private List<MonsterBase> activeMonsters = new List<MonsterBase>();
     
     private void Start()
     {
@@ -69,7 +70,7 @@ public class MonsterManager : MonoBehaviour
         
         // Spawn at the first path node
         PathNode spawnNode = mainPath[0];
-        Monster monster = Instantiate(monsterPrefab, spawnNode.transform.position, Quaternion.identity, monsterContainer);
+        MonsterBase monster = Instantiate(monsterPrefab, spawnNode.transform.position, Quaternion.identity, monsterContainer);
         
         // Initialize the monster with its data
         monster.Initialize(monsterData);
@@ -97,7 +98,7 @@ public class MonsterManager : MonoBehaviour
     /// <summary>
     /// Registers a monster with the manager
     /// </summary>
-    public void RegisterMonster(Monster monster)
+    public void RegisterMonster(MonsterBase monster)
     {
         if (!activeMonsters.Contains(monster))
         {
@@ -115,7 +116,7 @@ public class MonsterManager : MonoBehaviour
     /// <summary>
     /// Removes a monster from the manager
     /// </summary>
-    public void RemoveMonster(Monster monster)
+    public void RemoveMonster(MonsterBase monster)
     {
         activeMonsters.Remove(monster);
     }
@@ -123,7 +124,7 @@ public class MonsterManager : MonoBehaviour
     /// <summary>
     /// Called when a monster reaches the end of the path
     /// </summary>
-    public void OnMonsterReachedEnd(Monster monster)
+    public void OnMonsterReachedEnd(MonsterBase monster)
     {
         // Notify the WaveManager that a monster leaked through
         if (WaveManager.Instance != null)
@@ -137,7 +138,7 @@ public class MonsterManager : MonoBehaviour
     /// <summary>
     /// Called when a monster is defeated by the player
     /// </summary>
-    public void OnMonsterDefeated(Monster monster, int rewardAmount)
+    public void OnMonsterDefeated(MonsterBase monster, int rewardAmount)
     {
         // Add resources for defeating the monster
         if (GameDataManager.Instance != null)
@@ -154,13 +155,7 @@ public class MonsterManager : MonoBehaviour
         RemoveMonster(monster);
     }
     
-    /// <summary>
-    /// Gets all active monsters in the scene
-    /// </summary>
-    public List<Monster> GetActiveMonsters()
-    {
-        return new List<Monster>(activeMonsters);
-    }
+
     
     /// <summary>
     /// Gets the number of active monsters
