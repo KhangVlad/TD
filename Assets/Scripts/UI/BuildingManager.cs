@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
 
 public class BuildingManager : MonoBehaviour
 {
@@ -34,51 +32,96 @@ public class BuildingManager : MonoBehaviour
   
     [SerializeField] private SpriteRenderer map;
     
-    [Header("Settings")]
-    [SerializeField] private LayerMask buildingLayer;
+    // [Header("Settings")]
+    // [SerializeField] private LayerMask buildingLayer;
     [SerializeField] private float selectionRadius = 100f;
     [SerializeField] private float flagAnimationDuration = 0.5f;
     #endregion
-
+ 
     #region Private Variables
-    private GameObject _flagInstance;
-    private Vector2 _mousePos;
+    private Vector2 _currentMousePos;
     private BuildSpot _currentSelectedSpot;
     private Tower _currentSelectedTower;
     private Coroutine _flagCoroutine;
     #endregion
 
     #region Public Properties
-
-   [SerializeField] public bool IsPlacingFlag;
+    [SerializeField] public bool IsPlacingFlag;
     #endregion
 
     private void Start()
     {
         InitializeUI();
+        SubscribeToEvents();
     }
 
     private void OnDestroy()
     {
         CleanupEventListeners();
+        UnsubscribeFromEvents();
     }
 
-    private void Update()
+    #region Event Subscriptions
+    private void SubscribeToEvents()
     {
-        if (Input.GetMouseButtonDown(0) && !Utilities.IsPointerOverUI())
+        if (ScreenInteract.Instance == null)
         {
-            _mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Debug.LogError("ScreenInteract instance is null. Make sure it's initialized before BuildingManager.");
+            return;
+        }
 
-            if (IsPlacingFlag)
-            {
-                PlaceFlag();
-            }
-            else
-            {
-                HandleMouseClick();
-            }
+        // Subscribe to general events
+        ScreenInteract.Instance.OnScreenClick += OnScreenClick;
+        
+        // Subscribe to specialized events
+        ScreenInteract.Instance.OnTowerClick += OnTowerClick;
+        ScreenInteract.Instance.OnBuildSpotClick += OnBuildSpotClick;
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        if (ScreenInteract.Instance != null)
+        {
+            ScreenInteract.Instance.OnScreenClick -= OnScreenClick;
+            ScreenInteract.Instance.OnTowerClick -= OnTowerClick;
+            ScreenInteract.Instance.OnBuildSpotClick -= OnBuildSpotClick;
         }
     }
+
+    private void OnScreenClick(Vector2 mousePos)
+    {
+        _currentMousePos = mousePos;
+        
+        if (IsPlacingFlag)
+        {
+            PlaceFlag();
+        }
+    }
+
+    private void OnTowerClick(Tower tower)
+    {
+        if (!IsPlacingFlag)
+        {
+            SelectTower(tower);
+        }
+    }
+
+    private void OnBuildSpotClick(BuildSpot buildSpot)
+    {
+        if (!IsPlacingFlag)
+        {
+            SelectBuildingSpot(buildSpot);
+        }
+    }
+
+    private void OnEmptyClick()
+    {
+        if (!IsPlacingFlag)
+        {
+            ClearSelection();
+        }
+    }
+    #endregion
 
     #region Initialization Methods
     private void InitializeUI()
@@ -127,35 +170,13 @@ public class BuildingManager : MonoBehaviour
     {
         if (_currentSelectedTower is Barracks barracks)
         {
-            barracks.PutFlag(_mousePos);
+            barracks.PutFlag(_currentMousePos);
             IsPlacingFlag = false;
         }
     }
-
-   
     #endregion
 
-    #region Mouse Click Handling
-    private void HandleMouseClick()
-    {
-        RaycastHit2D hit = Physics2D.Raycast(_mousePos, Vector2.zero, 100f, buildingLayer);
-        
-        if (hit.collider == null)
-        {
-            ClearSelection();
-            return;
-        }
-
-        if (hit.collider.TryGetComponent<BuildSpot>(out BuildSpot buildingSpot))
-        {
-            SelectBuildingSpot(buildingSpot);
-        }
-        else if (hit.collider.TryGetComponent<Tower>(out Tower tower))
-        {
-            SelectTower(tower);
-        }
-    }
-
+    #region Selection Handling
     private void ClearSelection()
     {
         HideSelectionUI();
@@ -167,7 +188,7 @@ public class BuildingManager : MonoBehaviour
     {
         _currentSelectedSpot = buildingSpot;
         _currentSelectedTower = null;
-        ShowSelectionCircleAt(buildingSpot.transform.position,false);
+        ShowSelectionCircleAt(buildingSpot.transform.position, false);
         ShowBaseTowerOptions();
     }
 
@@ -175,7 +196,7 @@ public class BuildingManager : MonoBehaviour
     {
         _currentSelectedTower = tower;
         _currentSelectedSpot = null;
-        ShowSelectionCircleAt(tower.transform.position,tower is Barracks);
+        ShowSelectionCircleAt(tower.transform.position, tower is Barracks);
         ShowUpgradeOptions(tower.dataSO);
     }
     #endregion
@@ -207,7 +228,6 @@ public class BuildingManager : MonoBehaviour
             }
         }
     }
-
 
     private void HideSelectionUI()
     {

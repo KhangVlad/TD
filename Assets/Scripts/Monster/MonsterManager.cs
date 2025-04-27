@@ -25,6 +25,7 @@ public class MonsterManager : MonoBehaviour
     [Header("Monster Configuration")]
     [SerializeField] private MonsterBase monsterPrefab;
     [SerializeField] private MonsterBase skeletonPrefab;
+    [SerializeField] private MonsterBase forestMonsterPrefab;
     [SerializeField] private Transform monsterContainer;
     
     private List<MonsterBase> activeMonsters = new List<MonsterBase>();
@@ -70,7 +71,17 @@ public class MonsterManager : MonoBehaviour
         
         // Spawn at the first path node
         PathNode spawnNode = mainPath[0];
-        MonsterBase monster = Instantiate(monsterPrefab, spawnNode.transform.position, Quaternion.identity, monsterContainer);
+        // MonsterBase monster = Instantiate(monsterPrefab, spawnNode.transform.position, Quaternion.identity, monsterContainer);
+        MonsterBase monster = null;
+        switch (monsterData.id)
+        {
+            case MonsterID.Skeleton:
+                monster = Instantiate(monsterPrefab, spawnNode.transform.position, Quaternion.identity, monsterContainer);
+                break;
+            case MonsterID.ForestMonster:
+                monster = Instantiate(forestMonsterPrefab, spawnNode.transform.position, Quaternion.identity, monsterContainer);
+                break;
+        }
         
         // Initialize the monster with its data
         monster.Initialize(monsterData);

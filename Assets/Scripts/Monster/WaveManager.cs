@@ -80,18 +80,22 @@ public class WaveManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
+        // if (Input.GetKeyDown(KeyCode.A))
+        // {
+        //     StartNextWave();
+        // }
+        //
+        // if (Input.GetKeyDown(KeyCode.Space))
+        // {
+        //     SpawnMonster(MonsterID.Goblin);
+        // }
+        // if (Input.GetKeyDown(KeyCode.A))
+        // {
+        //     SpawnMonster(MonsterID.Skeleton);
+        // }
+        if (Input.GetKeyDown(KeyCode.S))
         {
-            StartNextWave();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            SpawnMonster(MonsterType.Goblin);
-        }
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            SpawnMonster(MonsterType.Skeleton);
+            SpawnMonster(MonsterID.ForestMonster);
         }
     }
 
@@ -160,7 +164,7 @@ public class WaveManager : MonoBehaviour
             // Spawn the specified quantity of this monster
             for (int i = 0; i < monsterData.quantity; i++)
             {
-                SpawnMonster(monsterData.monsterType);
+                SpawnMonster(monsterData.monsterID);
                 _totalMonstersSpawnedInCurrentWave++;
 
                 // Update progress
@@ -183,14 +187,14 @@ public class WaveManager : MonoBehaviour
     /// <summary>
     /// Spawns a single monster of the specified type
     /// </summary>
-    private void SpawnMonster(MonsterType monsterType)
+    private void SpawnMonster(MonsterID monsterID)
     {
         // Get the monster scriptable object for this type
-        MonsterSO monsterSO = GameDataManager.Instance.GetMonsterSOByType(monsterType);
+        MonsterSO monsterSO = GameDataManager.Instance.GetMonsterSOByType(monsterID);
 
         if (monsterSO == null)
         {
-            Debug.LogError($"Monster type {monsterType} not found in GameDataManager!");
+            Debug.LogError($"Monster type {monsterID} not found in GameDataManager!");
             return;
         }
 

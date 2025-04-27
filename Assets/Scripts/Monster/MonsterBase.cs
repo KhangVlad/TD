@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Public enum for direction that will be visible in the inspector
 public enum FacingDirection
 {
     Up,
@@ -10,7 +9,6 @@ public enum FacingDirection
     None
 }
 
-// Extending the MonsterBase class to include the direction enum
 public abstract class MonsterBase : MonoBehaviour
 {
     public MonsterSO monsterSO { get; protected set; }
@@ -93,34 +91,19 @@ public abstract class MonsterBase : MonoBehaviour
     
     public virtual void LookAtTarget(Vector2 targetPosition)
     {
-        // Calculate the direction vector from current position to target
         Vector2 direction = new Vector2(
             targetPosition.x - transform.position.x,
             targetPosition.y - transform.position.y
         ).normalized;
-        
-        // Store facing direction for animation
         facingDirection = direction;
-        
-        // Calculate the angle in degrees
-        // Atan2 returns angle in radians between -π and π
-        // Convert to degrees (-180 to 180)
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        
-        // Adjust the angle to make 0 degrees point up (instead of right)
-        // This rotates the coordinate system by 90 degrees
         angle -= 90f;
-        
-        // Normalize the angle to be between -180 and 180
         if (angle > 180f) angle -= 360f;
         if (angle < -180f) angle += 360f;
-        
-        // Flip sprite based on horizontal direction
         if (direction.x < 0)
         {
             transform.localScale = new Vector3(-1, 1, 1);
             
-            // Update enum for left-facing direction when horizontal
             if (currentDirection == FacingDirection.Right)
             {
                 currentDirection = FacingDirection.Left;
@@ -129,21 +112,16 @@ public abstract class MonsterBase : MonoBehaviour
         else
         {
             transform.localScale = new Vector3(1, 1, 1);
-            
-            // Update enum for right-facing direction when horizontal
             if (currentDirection == FacingDirection.Left)
             {
                 currentDirection = FacingDirection.Right;
             }
         }
-            
-        // Determine facing direction based on angle segments
         UpdateAnimationDirectionFromAngle(angle);
     }
     
     protected virtual void UpdateAnimationDirectionFromAngle(float angle)
     {
-        // Check if we have a valid animator with a controller
         if (animator == null || !animator.runtimeAnimatorController) 
         {
             Debug.LogWarning("Animator missing or has no controller assigned");
@@ -152,18 +130,9 @@ public abstract class MonsterBase : MonoBehaviour
         
         try
         {
-            // Reset all triggers to avoid conflicts
             animator.ResetTrigger(MovingUp);
             animator.ResetTrigger(MovingDown);
             animator.ResetTrigger(MovingHorizon);
-            
-            // Apply the angle segment logic:
-            // -60 to 60 = Up
-            // 60 to 150 or -60 to -150 = Horizontal
-            // Greater than 150 or less than -150 = Down
-            
-            float absAngle = Mathf.Abs(angle);
-            
             if (angle >= -60f && angle <= 60f)
             {
                 // Up direction
@@ -172,10 +141,7 @@ public abstract class MonsterBase : MonoBehaviour
             }
             else if ((angle > 60f && angle < 150f) || (angle < -60f && angle > -150f))
             {
-                // Horizontal direction
                 animator.SetTrigger(MovingHorizon);
-                
-                // Update the direction enum based on horizontal scale
                 if (transform.localScale.x < 0)
                 {
                     currentDirection = FacingDirection.Left;
@@ -187,7 +153,6 @@ public abstract class MonsterBase : MonoBehaviour
             }
             else
             {
-                // Down direction (angle > 150 or angle < -150)
                 animator.SetTrigger(MovingDown);
                 currentDirection = FacingDirection.Down;
             }
@@ -198,7 +163,6 @@ public abstract class MonsterBase : MonoBehaviour
         }
     }
 
-    // Rest of the MonsterBase class methods remain unchanged
     public virtual void Initialize(MonsterSO so)
     {
         monsterSO = so;
@@ -241,7 +205,6 @@ public abstract class MonsterBase : MonoBehaviour
         Destroy(gameObject);
     }
     
-    // Call this when getting a new path node
     public virtual void UpdatePathNode(Vector3 newNodePosition)
     {
         LookAtTarget(newNodePosition);

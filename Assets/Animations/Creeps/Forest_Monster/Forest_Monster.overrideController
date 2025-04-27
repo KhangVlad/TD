@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Forest_Monster
+  m_Controller: {fileID: 9100000, guid: e12556fed539e489d85f68f65e73a975, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 03db287f5a2684b66ab61dfbfbf77ce1, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: f3dc0a05fc71948c5a9b5dc78c01850b, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 5ad3987324ade4a559041deece5c45f1, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: f3dc0a05fc71948c5a9b5dc78c01850b, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: cd60bfe49f5a7488f8fef6b3d740ad76, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: f3dc0a05fc71948c5a9b5dc78c01850b, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 4e5ce184368394b6a917856450e0a31e, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 7d2a9a0914f584fedb27ed5f11d585b7, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 70d39a3a9d53a4a25a90ab0e3e0b02ad, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 6ab01d730719c40df873caace3ac78cf, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 390828b88baaa450a8355f3787887e8d, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 7d2a9a0914f584fedb27ed5f11d585b7, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 06e9b281d59bd4f658133fcb9b282393, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 551138cd164eb46ee8e1169f9d57d9cb, type: 2}

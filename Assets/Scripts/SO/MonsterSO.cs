@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "Monster", menuName = "TD/MonsterSO", order = 1)]
 public class MonsterSO : ScriptableObject
@@ -6,7 +7,7 @@ public class MonsterSO : ScriptableObject
     [Header("Basic Info")]
     public string monsterName;
     public Sprite sprite;
-    public MonsterType type;
+    [FormerlySerializedAs("type")] public MonsterID id;
     
     [Header("Stats")]
     public int health = 100;
@@ -32,7 +33,7 @@ public class MonsterSO : ScriptableObject
     public string description;
 }
 
-public enum MonsterType
+public enum MonsterID
 {
     Goblin = 0,
     Orc = 1,
@@ -41,4 +42,5 @@ public enum MonsterType
     Ghost = 4,
     Dragon = 5,
     Boss = 6,
+    ForestMonster = 7,
 }

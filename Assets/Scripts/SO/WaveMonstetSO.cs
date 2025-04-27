@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Defines a single monster in a wave
@@ -8,7 +9,7 @@ using UnityEngine;
 [Serializable]
 public class WaveMonster
 {
-    public MonsterType monsterType;
+    [FormerlySerializedAs("monsterType")] public MonsterID monsterID;
     public int quantity;
     [Tooltip("Delay between spawning each monster of this type (in seconds)")]
     public float spawnDelay = 1f;

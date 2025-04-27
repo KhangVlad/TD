@@ -87,15 +87,15 @@ public class GameDataManager : MonoBehaviour
     /// <summary>
     /// Gets a monster ScriptableObject by type
     /// </summary>
-    public MonsterSO GetMonsterSOByType(MonsterType type)
+    public MonsterSO GetMonsterSOByType(MonsterID id)
     {
         foreach (MonsterSO monster in monsterSOList)
         {
-            if (monster.type == type)
+            if (monster.id == id)
                 return monster;
         }
         
-        Debug.LogWarning($"Monster type {type} not found in GameDataManager!");
+        Debug.LogWarning($"Monster type {id} not found in GameDataManager!");
         return null;
     }
     
