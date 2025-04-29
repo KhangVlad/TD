@@ -79,7 +79,7 @@ public class MonsterManager : MonoBehaviour
                 monster = Instantiate(monsterPrefab, spawnNode.transform.position, Quaternion.identity, monsterContainer);
                 break;
             case MonsterID.ForestMonster:
-                monster = Instantiate(forestMonsterPrefab, spawnNode.transform.position, Quaternion.identity, monsterContainer);
+                monster = Instantiate(skeletonPrefab, spawnNode.transform.position, Quaternion.identity, monsterContainer);
                 break;
         }
         

@@ -70,23 +70,7 @@ public abstract class MonsterBase : MonoBehaviour
 
     protected virtual void Update()
     {
-        // For top-down games, we don't need to calculate movement direction every frame
-        // Direction is determined when targeting or path changes
-        
-        // Update state
         CurrentState?.UpdateState(this);
-    }
-    
-    protected virtual void UpdateMovementDirection()
-    {
-        // For a top-down game, we don't need to track incremental changes
-        // We just need the direction toward the target
-        if (CurrentState == _movingState)
-        {
-            // We're only concerned with significant movement
-            // The movement direction is already determined by LookAtTarget
-            // No need to calculate it again here
-        }
     }
     
     public virtual void LookAtTarget(Vector2 targetPosition)

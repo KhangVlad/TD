@@ -50,7 +50,7 @@ public abstract class Unit : MonoBehaviour
         if (data != null)
         {
             attackRange = data.attackRange;
-            MovementSpeed = data.speed;
+            MovementSpeed = data.moveSpeed;
         }
     }
 

@@ -6,7 +6,6 @@ using DG.Tweening;
 
 public class Barracks : Tower
 {
-
     [Header("Barracks Settings")] [SerializeField]
     private int maxSoldiers = 3;
 
@@ -14,14 +13,15 @@ public class Barracks : Tower
     [SerializeField] private float _detectRange = 1f;
     [SerializeField] private float flagAnimationDuration = 0.5f;
 
-    [Header("Flag Area")] 
-    [SerializeField] private float _activityRange = 1.5f;
+    [Header("Flag Area")] [SerializeField] private float _activityRange = 1.5f;
+
     private readonly Vector2[] _triangleOffsets = new Vector2[]
     {
         new Vector2(0f, 0.49f),
         new Vector2(-0.42f, -0.2555f),
         new Vector2(0.42f, -0.2555f),
     };
+
     private SoldierWithTarget[] _soldiers;
     private Coroutine _flagCoroutine;
     private float _spawnTimer = 0f;
@@ -41,12 +41,9 @@ public class Barracks : Tower
         TrySpawnSoldier();
     }
 
-
-
     #endregion
 
     #region Tower Initialization
-
 
     public void InitializeTower(TowerSO data)
     {
@@ -68,6 +65,7 @@ public class Barracks : Tower
         {
             return;
         }
+
         _spawnTimer += Time.deltaTime;
 
         if (_spawnTimer >= spawnTime)
@@ -147,6 +145,7 @@ public class Barracks : Tower
         {
             return;
         }
+
         List<SoldierWithTarget> activeSoldiers = new List<SoldierWithTarget>();
         foreach (var soldierWithTarget in _soldiers)
         {
@@ -155,10 +154,12 @@ public class Barracks : Tower
                 activeSoldiers.Add(soldierWithTarget);
             }
         }
+
         foreach (var soldier in activeSoldiers)
         {
             soldier.monster = null;
         }
+
         if (_monstersInArea.Count >= activeSoldiers.Count)
         {
             AssignOneMonsterPerSoldier(activeSoldiers, entranceMonster);
@@ -168,7 +169,8 @@ public class Barracks : Tower
             DistributeSoldiersToMonsters(activeSoldiers, entranceMonster);
         }
     }
-        protected override void OnMonsterEnterArea(MonsterBase monster)
+
+    protected override void OnMonsterEnterArea(MonsterBase monster)
     {
         UpdateSoldierTargets(monster);
     }
@@ -178,7 +180,7 @@ public class Barracks : Tower
         if (monster != null)
         {
             _monstersInArea.Remove(monster);
-        
+
             // Clear this monster from any soldiers targeting it
             foreach (var soldierWithTarget in _soldiers)
             {
@@ -191,6 +193,7 @@ public class Barracks : Tower
                     }
                 }
             }
+
             UpdateSoldierTargets(null);
         }
     }
@@ -198,7 +201,7 @@ public class Barracks : Tower
     private void AssignOneMonsterPerSoldier(List<SoldierWithTarget> soldiers, MonsterBase entranceMonster)
     {
         List<MonsterBase> availableMonsters = new List<MonsterBase>(_monstersInArea);
-        
+
         if (entranceMonster != null && availableMonsters.Contains(entranceMonster))
         {
             soldiers[0].SetTarget(entranceMonster);
@@ -246,20 +249,23 @@ public class Barracks : Tower
                 soldiers[currentSoldierIndex].SetTarget(entranceMonster);
                 currentSoldierIndex++;
             }
+
             List<MonsterBase> remainingMonsters = new List<MonsterBase>(_monstersInArea);
             remainingMonsters.Remove(entranceMonster);
-            
+
             while (currentSoldierIndex < soldiers.Count && remainingMonsters.Count > 0)
             {
                 MonsterBase currentMonster = remainingMonsters[currentMonsterIndex];
-                
+
                 for (int i = 0; i < soldiersPerMonster && currentSoldierIndex < soldiers.Count; i++)
                 {
                     soldiers[currentSoldierIndex].SetTarget(currentMonster);
                     currentSoldierIndex++;
                 }
+
                 currentMonsterIndex = (currentMonsterIndex + 1) % remainingMonsters.Count;
             }
+
             if (currentSoldierIndex < soldiers.Count)
             {
                 currentMonsterIndex = 0; // Start from the beginning of the monster list
@@ -278,7 +284,7 @@ public class Barracks : Tower
             {
                 MonsterBase target = _monstersInArea[currentMonsterIndex];
                 soldiers[i].SetTarget(target);
-                
+
                 // Move to next monster after assigning soldiersPerMonster
                 if ((i + 1) % soldiersPerMonster == 0)
                 {
@@ -294,9 +300,15 @@ public class Barracks : Tower
 
     public void PutFlag(Vector2 position)
     {
-      base.OnFlagPlaced(position);
+        if (!IsPointInRange(position)) return;
+        base.OnFlagPlaced(position);
     }
-    
+
+    public bool IsPointInRange(Vector2 p)
+    {
+        float distance = Vector2.Distance(p, transform.position);
+        return distance <= _activityRange;
+    }
 
     #endregion
 }

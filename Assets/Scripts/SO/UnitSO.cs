@@ -1,17 +1,18 @@
-
+using System;
 using UnityEngine;
+using UnityEngine.Serialization;
+
 // [CreateAssetMenu(fileName = "TD", menuName = "TD/Unit", order = 1)]
 public class UnitSO : ScriptableObject
 {
+    public UnitID unitID;
     public string unitName;
     public float health;
     public float attackDamage;
     public float attackRange;
     public float attackSpeed;
-    public float speed;
-    // Add other common properties as needed
+    public float moveSpeed;
 }
-
 
 
 [CreateAssetMenu(fileName = "Soldier", menuName = "TD/Units/Soldier", order = 1)]
@@ -29,5 +30,28 @@ public class ArcherSO : UnitSO
     public float arrowLifetime = 3f;
     public float criticalHitChance = 0.1f;
     public float criticalHitMultiplier = 2f;
-    // Add any other archer-specific stats or properties
+}
+
+[CreateAssetMenu(fileName = "Hero", menuName = "TD/Units/Hero")]
+public class HeroSO : UnitSO
+{
+    
+}
+
+
+
+public enum UnitID
+{
+    None = 0,
+    Warrior = 1,
+    Archer = 2,
+    
+    
+    
+    
+    
+    //hero start from 200
+    Bolverk = 200,
+    
+    
 }
