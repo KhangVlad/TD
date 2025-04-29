@@ -67,6 +67,8 @@ public class UIHealthBar : MonoBehaviour
     
     public void Initialize(float maxHealth)
     {
-       
+        // Set the initial fill amount to full
+        _currentFill = 1f;
+        UpdateFillVisual(_currentFill);
     }
 }

@@ -61,21 +61,21 @@ public class WaveManager : MonoBehaviour
 
     private void Start()
     {
-        if (currentLevel == null)
-        {
-            Debug.LogError("WaveManager: No level data assigned!");
-            return;
-        }
-
-        // Set initial resources
-        if (GameDataManager.Instance != null)
-        {
-            GameDataManager.Instance.SetCurrentResources(currentLevel.startingResources);
-        }
-
-        if (autoStartWaves)
-        {
-        }
+        // if (currentLevel == null)
+        // {
+        //     Debug.LogError("WaveManager: No level data assigned!");
+        //     return;
+        // }
+        //
+        // // Set initial resources
+        // if (GameDataManager.Instance != null)
+        // {
+        //     GameDataManager.Instance.SetCurrentResources(currentLevel.startingResources);
+        // }
+        //
+        // if (autoStartWaves)
+        // {
+        // }
     }
 
     private void Update()

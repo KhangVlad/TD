@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class HeroBehavior : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class HeroBehavior : MonoBehaviour
     [SerializeField] private Material mat;
     public Animator animator;
     public UnitID heroID;
-    public HeroSO data;
+   public HeroSO heroData;
     private Vector2 targetPosition;
     private bool isMoving = false;
     public readonly int MovingDown = Animator.StringToHash("Down");
@@ -23,7 +24,6 @@ public class HeroBehavior : MonoBehaviour
     public HeroAttackState attackState;
     public HeroIdleState idleState;
     private IHeroState currentState;
-
     private void Awake()
     {
         moveState = new HeroMovingState();
@@ -42,6 +42,11 @@ public class HeroBehavior : MonoBehaviour
         {
             currentState.UpdateState(this);
         }
+    }
+    public void Initialize(HeroSO data)
+    {
+        heroData = data;
+        heroID = data.unitID;
     }
 
     public void SetState(IHeroState newState)

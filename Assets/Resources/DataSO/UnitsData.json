@@ -1,0 +1,40 @@
+﻿{
+  "units": [
+    {
+      "type": "Soldier",
+      "unitID": 1,
+      "unitName": "Warrior",
+      "health": 100.0,
+      "attackDamage": 15.0,
+      "attackRange": 1.5,
+      "attackSpeed": 1.0,
+      "moveSpeed": 3.5,
+      "damage": 20.0,
+      "meleeAttackBonus": 5.0
+    },
+    {
+      "type": "Archer",
+      "unitID": 2,
+      "unitName": "Archer",
+      "health": 75.0,
+      "attackDamage": 20.0,
+      "attackRange": 10.0,
+      "attackSpeed": 0.8,
+      "moveSpeed": 3.0,
+      "arrowSpeed": 15.0,
+      "arrowLifetime": 2.5,
+      "criticalHitChance": 0.15,
+      "criticalHitMultiplier": 2.5
+    },
+    {
+      "type": "Hero",
+      "unitID": 200,
+      "unitName": "Bolverk",
+      "health": 300.0,
+      "attackDamage": 35.0,
+      "attackRange": 2.0,
+      "attackSpeed": 1.2,
+      "moveSpeed": 4.0
+    }
+  ]
+}

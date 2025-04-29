@@ -1,11 +1,13 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Events;
 
 public class GameDataManager : MonoBehaviour
 {
     #region Singleton
+
     public static GameDataManager Instance { get; private set; }
 
     private void Awake()
@@ -20,23 +22,24 @@ public class GameDataManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
     #endregion
 
-    [Header("Data Collections")]
-    [SerializeField] private List<TowerSO> towerSOList = new List<TowerSO>();
+    [Header("Data Collections")] [SerializeField]
+    private List<TowerSO> towerSOList = new List<TowerSO>();
+
     [SerializeField] private List<MonsterSO> monsterSOList = new List<MonsterSO>();
     [SerializeField] private List<LevelDataSO> levelDataList = new List<LevelDataSO>();
-
-    [Header("Economy")]
-    [SerializeField] private int currentResources = 100;
+    [SerializeField] private List<HeroSO> heroDataList = new();
+    [Header("Economy")] [SerializeField] private int currentResources = 100;
     public UnityEvent<int> onResourcesChanged;
 
-    [Header("Game Progress")]
-    [SerializeField] private int currentLevelIndex = 0;
+    [Header("Game Progress")] [SerializeField]
+    private int currentLevelIndex = 0;
+
     [SerializeField] private int highestUnlockedLevel = 0;
-    
-    [Header("Settings")]
-    [SerializeField] private bool loadDataOnStart = true;
+
+    [Header("Settings")] [SerializeField] private bool loadDataOnStart = true;
 
     private void Start()
     {
@@ -47,31 +50,38 @@ public class GameDataManager : MonoBehaviour
     }
 
     #region Data Loading
-    
+
     /// <summary>
     /// Loads all ScriptableObject data from Resources folders
     /// </summary>
     public void LoadDataSO()
     {
-        // Load Tower Data
-        towerSOList.Clear();
-        towerSOList.AddRange(Resources.LoadAll<TowerSO>("DataSO/Towers"));
-        
-        // Load Monster Data
-        monsterSOList.Clear();
-        monsterSOList.AddRange(Resources.LoadAll<MonsterSO>("DataSO/Monsters"));
-        
-        // Load Level Data
-        levelDataList.Clear();
-        levelDataList.AddRange(Resources.LoadAll<LevelDataSO>("DataSO/Levels"));
-        
-        Debug.Log($"Loaded: {towerSOList.Count} towers, {monsterSOList.Count} monsters, {levelDataList.Count} levels");
+        towerSOList = Resources.LoadAll<TowerSO>("DataSO/Towers").ToList();
+        monsterSOList = Resources.LoadAll<MonsterSO>("DataSO/Monsters").ToList();
+
+        levelDataList = Resources.LoadAll<LevelDataSO>("DataSO/Levels").ToList();
+
+        heroDataList = Resources.LoadAll<HeroSO>("DataSO/Units").ToList();
     }
-    
+
+    public HeroSO GetHeroData(UnitID heroId)
+    {
+        HeroSO data = null;
+        for (int i = 0; i < heroDataList.Count; i++)
+        {
+            if (heroDataList[i].unitID == heroId)
+            {
+                data = heroDataList[i];
+            }
+        }
+
+        return data;
+    }
+
     #endregion
-    
+
     #region Monster Data
-    
+
     /// <summary>
     /// Gets the first available monster ScriptableObject
     /// </summary>
@@ -79,11 +89,11 @@ public class GameDataManager : MonoBehaviour
     {
         if (monsterSOList.Count > 0)
             return monsterSOList[0];
-            
+
         Debug.LogError("No monster data found in GameDataManager!");
         return null;
     }
-    
+
     /// <summary>
     /// Gets a monster ScriptableObject by type
     /// </summary>
@@ -94,11 +104,11 @@ public class GameDataManager : MonoBehaviour
             if (monster.id == id)
                 return monster;
         }
-        
+
         Debug.LogWarning($"Monster type {id} not found in GameDataManager!");
         return null;
     }
-    
+
     /// <summary>
     /// Gets a monster ScriptableObject by name
     /// </summary>
@@ -109,25 +119,25 @@ public class GameDataManager : MonoBehaviour
             if (monster.monsterName == monsterName)
                 return monster;
         }
-        
+
         Debug.LogWarning($"Monster named {monsterName} not found in GameDataManager!");
         return null;
     }
-    
+
     #endregion
-    
+
     #region Tower Data
-    
+
     /// <summary>
     /// Gets all possible tower upgrades for a given tower
     /// </summary>
     public List<TowerSO> GetPossibleUpgrade(TowerSO tow)
     {
         List<TowerSO> possibleUpgrades = new List<TowerSO>();
-        
+
         if (tow == null || tow.possibleUpgrades == null)
             return possibleUpgrades;
-            
+
         for (int i = 0; i < tow.possibleUpgrades.Count; i++)
         {
             foreach (TowerSO towerSO in towerSOList)
@@ -158,7 +168,7 @@ public class GameDataManager : MonoBehaviour
 
         return baseTowers;
     }
-    
+
     /// <summary>
     /// Gets a tower by its type
     /// </summary>
@@ -169,15 +179,15 @@ public class GameDataManager : MonoBehaviour
             if (tower.type == type)
                 return tower;
         }
-        
+
         Debug.LogWarning($"Tower type {type} not found in GameDataManager!");
         return null;
     }
-    
+
     #endregion
-    
+
     #region Level Data
-    
+
     /// <summary>
     /// Gets the level data for a specific level index
     /// </summary>
@@ -188,10 +198,10 @@ public class GameDataManager : MonoBehaviour
             Debug.LogError($"Level index {levelIndex} is out of range!");
             return null;
         }
-        
+
         return levelDataList[levelIndex];
     }
-    
+
     /// <summary>
     /// Gets the current level data
     /// </summary>
@@ -199,7 +209,7 @@ public class GameDataManager : MonoBehaviour
     {
         return GetLevelData(currentLevelIndex);
     }
-    
+
     /// <summary>
     /// Sets the current level index
     /// </summary>
@@ -207,7 +217,7 @@ public class GameDataManager : MonoBehaviour
     {
         currentLevelIndex = Mathf.Clamp(levelIndex, 0, levelDataList.Count - 1);
     }
-    
+
     /// <summary>
     /// Unlocks the next level
     /// </summary>
@@ -216,7 +226,7 @@ public class GameDataManager : MonoBehaviour
         highestUnlockedLevel = Mathf.Max(highestUnlockedLevel, currentLevelIndex + 1);
         highestUnlockedLevel = Mathf.Min(highestUnlockedLevel, levelDataList.Count - 1);
     }
-    
+
     /// <summary>
     /// Checks if a level is unlocked
     /// </summary>
@@ -224,7 +234,7 @@ public class GameDataManager : MonoBehaviour
     {
         return levelIndex <= highestUnlockedLevel;
     }
-    
+
     /// <summary>
     /// Gets the total number of levels
     /// </summary>
@@ -232,11 +242,11 @@ public class GameDataManager : MonoBehaviour
     {
         return levelDataList.Count;
     }
-    
+
     #endregion
-    
+
     #region Economy
-    
+
     /// <summary>
     /// Checks if player can afford a cost
     /// </summary>
@@ -244,7 +254,7 @@ public class GameDataManager : MonoBehaviour
     {
         return currentResources >= cost;
     }
-    
+
     /// <summary>
     /// Attempts to spend resources
     /// </summary>
@@ -256,10 +266,10 @@ public class GameDataManager : MonoBehaviour
             onResourcesChanged?.Invoke(currentResources);
             return true;
         }
-        
+
         return false;
     }
-    
+
     /// <summary>
     /// Adds resources to the player's total
     /// </summary>
@@ -268,7 +278,7 @@ public class GameDataManager : MonoBehaviour
         currentResources += amount;
         onResourcesChanged?.Invoke(currentResources);
     }
-    
+
     /// <summary>
     /// Sets the current resource amount
     /// </summary>
@@ -277,7 +287,7 @@ public class GameDataManager : MonoBehaviour
         currentResources = Mathf.Max(0, amount);
         onResourcesChanged?.Invoke(currentResources);
     }
-    
+
     /// <summary>
     /// Gets the current resource amount
     /// </summary>
@@ -285,13 +295,13 @@ public class GameDataManager : MonoBehaviour
     {
         return currentResources;
     }
-    
+
     #endregion
-    
+
     #region Save/Load Game State
-    
+
     // TODO: Implement save/load functionality when needed
     // This would include saving current resources, unlocked levels, etc.
-    
+
     #endregion
 }
