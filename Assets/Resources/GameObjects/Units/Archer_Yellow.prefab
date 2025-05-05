@@ -157,6 +157,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   anim: {fileID: 7051935164150482170}
   unitSprite: {fileID: 1093154066307102581}
+  id: 2
   unitSO: {fileID: 0}
   monsterTarget: {fileID: 0}
   attackRange: 0

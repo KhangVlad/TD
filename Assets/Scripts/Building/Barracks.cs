@@ -13,7 +13,8 @@ public class Barracks : Tower
     [SerializeField] private float _detectRange = 1f;
     [SerializeField] private float flagAnimationDuration = 0.5f;
 
-    [Header("Flag Area")] [SerializeField] private float _activityRange = 1.5f;
+    [Header("Flag Area")]
+    private float _activityRange = 3f;
 
     private readonly Vector2[] _triangleOffsets = new Vector2[]
     {
@@ -101,12 +102,15 @@ public class Barracks : Tower
         int formationIndex = slotIndex % _triangleOffsets.Length;
 
         // Instantiate soldier
-        GameObject soldierObj = Instantiate(base.dataSO.soldierPrefab, transform.position, Quaternion.identity);
-        Soldier soldier = soldierObj.GetComponent<Soldier>();
-
-        _soldiers[slotIndex] = new SoldierWithTarget(soldier);
-        soldier.InitializeWithFlagPosition(flagPosition, _triangleOffsets[formationIndex], this,
-            base.dataSO.soldierData as SoldierSO);
+        Soldier soldierObj = GameObjectFactory.CreateUnitGameObject(base.dataSO.unitID,transform.position) as Soldier;
+        if (soldierObj is null)
+        {
+         Debug.Log("errr");
+         return;
+        }
+        _soldiers[slotIndex] = new SoldierWithTarget(soldierObj);
+        soldierObj.InitializeWithFlagPosition(flagPosition, _triangleOffsets[formationIndex], this,
+          GameDataManager.Instance.GetUnitDataSO(dataSO.unitID) as SoldierSO);
         _soldierCount++;
         if (_monstersInArea.Count > 0)
         {

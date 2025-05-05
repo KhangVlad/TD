@@ -15,30 +15,6 @@ public class UnitSO : ScriptableObject
 }
 
 
-[CreateAssetMenu(fileName = "Soldier", menuName = "TD/Units/Soldier", order = 1)]
-public class SoldierSO : UnitSO
-{
-    public float damage; // Used in AttackState
-    public float meleeAttackBonus;
-}
-
-
-[CreateAssetMenu(fileName = "NewArcherData", menuName = "TD/Units/ArcherData")]
-public class ArcherSO : UnitSO
-{
-    public float arrowSpeed = 10f;
-    public float arrowLifetime = 3f;
-    public float criticalHitChance = 0.1f;
-    public float criticalHitMultiplier = 2f;
-}
-
-[CreateAssetMenu(fileName = "Hero", menuName = "TD/Units/Hero")]
-public class HeroSO : UnitSO
-{
-    
-}
-
-
 
 public enum UnitID
 {

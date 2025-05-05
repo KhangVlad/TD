@@ -252,7 +252,6 @@ public class WaveManager : MonoBehaviour
             // Award resources for completing the wave
             if (GameDataManager.Instance != null)
             {
-                GameDataManager.Instance.AddResources(currentLevel.resourcesPerWaveCompleted);
             }
 
             if (debugMode)

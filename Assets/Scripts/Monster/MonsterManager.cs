@@ -154,7 +154,6 @@ public class MonsterManager : MonoBehaviour
         // Add resources for defeating the monster
         if (GameDataManager.Instance != null)
         {
-            GameDataManager.Instance.AddResources(rewardAmount);
         }
         
         // Notify the WaveManager that a monster was defeated

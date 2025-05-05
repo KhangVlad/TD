@@ -30,24 +30,24 @@ public class ArcherTower : Tower
         {
             archers = new ArcherWithTarget[2];
         }
-    
+
         // Check for null before assignment
-        GameObject archer1 = Instantiate(dataSO.soldierPrefab, archerLeftPos.position, Quaternion.identity);
+        Unit archer1 = GameObjectFactory.CreateUnitGameObject(dataSO.unitID,archerLeftPos.position);
         if (archer1 != null)
         {
             Archer soldier1 = archer1.GetComponent<Archer>();
             if (soldier1 != null)
             {
-                soldier1.Initialize(( dataSO.soldierData));
+                soldier1.Initialize(GameDataManager.Instance.GetUnitDataSO(dataSO.unitID));
                 archers[0] = new ArcherWithTarget(soldier1);
             }
         }
-    
-        GameObject archer2 = Instantiate(dataSO.soldierPrefab, archerRightPos.position, Quaternion.identity);
+
+        Unit archer2 = GameObjectFactory.CreateUnitGameObject(dataSO.unitID,archerRightPos.position);
         if (archer2 != null)
         {
             Archer soldier2 = archer2.GetComponent<Archer>();
-            soldier2.Initialize(( dataSO.soldierData));
+            soldier2.Initialize(GameDataManager.Instance.GetUnitDataSO(dataSO.unitID));
             if (soldier2 != null)
             {
                 archers[1] = new ArcherWithTarget(soldier2);
@@ -58,10 +58,10 @@ public class ArcherTower : Tower
     private void UpdateSoldierTargets(MonsterBase entranceMonster)
     {
         _monstersInArea.RemoveAll(monster => monster == null);
-    
+
         // Check array is valid
         if (archers == null) return;
-    
+
         for (int i = 0; i < archers.Length; i++)
         {
             // Check for null before accessing

@@ -1,148 +1,3 @@
-// using System;
-// using UnityEngine;
-//
-// public class Archer : Unit
-// {
-//     [Header("Archer State")]
-//     public ArcherIdleState idleState;
-//     public ArcherAttackState attackState;
-//     private IArcherState currentState;
-//     public ArcherState State;
-//
-//     [Header("Archer-specific Components")]
-//     [SerializeField] private Transform arrowSpawnPoint;
-//     [SerializeField] private Projectile arrowPrefab;
-//
-//     
-//     // Archer-specific properties
-//     public float arrowSpeed = 10f;
-//     public float arrowLifetime = 3f;
-//
-//     private void Awake()
-//     {
-//         idleState = new ArcherIdleState();
-//         attackState = new ArcherAttackState();
-//     }
-//
-//     protected override void Start()
-//     {
-//         base.Start();
-//     }
-//
-//     public void Initialize(ArcherSO data)
-//     {
-//         base.Initialize(data);
-//         if (data != null)
-//         {
-//             arrowSpeed = data.arrowSpeed;
-//             arrowLifetime = data.arrowLifetime;
-//         }
-//         ChangeState(ArcherState.Idle);
-//     }
-//
-//     protected override void CleanupMonsterTarget()
-//     {
-//         if (monsterTarget != null)
-//         {
-//             // monsterTarget.SetSoldierTarget(null);
-//         }
-//     }
-//
-//     protected override void HandleTargetChange(Monster target)
-//     {
-//         if (target != null)
-//         {
-//             ChangeState(ArcherState.Attacking);
-//         }
-//         else
-//         {
-//             ChangeState(ArcherState.Idle);
-//         }
-//     }
-//
-//     protected override void InitializeStateMachine()
-//     {
-//         ChangeState(ArcherState.Idle);
-//     }
-//
-//     protected override void UpdateStateMachine()
-//     {
-//         currentState?.UpdateState(this);
-//     }
-//
-//     public void ChangeState(ArcherState newState)
-//     {
-//         // Exit the current state
-//         currentState?.ExitState(this);
-//         State = newState;
-//
-//         switch (newState)
-//         {
-//             case ArcherState.Idle:
-//                 currentState = idleState;
-//                 break;
-//             case ArcherState.Attacking:
-//                 currentState = attackState;
-//                 break;
-//             default:
-//                 throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
-//         }
-//
-//         // Enter the new state
-//         currentState.EnterState(this);
-//     }
-//
-//     public override void PlayAttackAnimation()
-//     {
-//         base.PlayAttackAnimation();
-//         if (monsterTarget != null)
-//         {
-//             Vector2 direction = (monsterTarget.transform.position - transform.position).normalized;
-//             LookAtDirection(direction);
-//             anim.SetFloat("DirX", direction.x);
-//             anim.SetFloat("DirY", direction.y);
-//         }
-//     }
-//     public void FireArrow()
-//     {
-//         if (monsterTarget == null || ProjectileManager.Instance == null)
-//         {
-//             return;
-//         }
-//
-//         float damage = 10f; 
-//         if (unitSO != null)
-//         {
-//             damage = unitSO.attackDamage;
-//         }
-//         else
-//         {
-//             Debug.LogWarning("unitSO is null, using default damage value");
-//         }
-//         
-//         // Use ProjectileManager to get an arrow from the pool
-//         Projectile arrow = ProjectileManager.Instance.FireProjectile(
-//             ProjectileID.Arrow,              // Use the configured projectile type
-//             arrowSpawnPoint.position,    // Spawn position
-//             monsterTarget.transform,     // Target
-//             damage,                      // Damage
-//             arrowSpeed,                  // Speed
-//             arrowLifetime                // Lifetime
-//         );
-//         
-//         if (arrow == null)
-//         {
-//             Debug.LogWarning("Failed to get arrow from pool");
-//         }
-//         
-//         // Note: We don't need to call Initialize directly anymore as the ProjectileManager does this for us
-//     }
-//     
-// }
-//
-//
-
-
 using System;
 using UnityEngine;
 
@@ -242,16 +97,26 @@ public class Archer : Unit
         currentState.EnterState(this);
     }
 
-    public override void PlayAttackAnimation()
+    public void PlayAttackAnimation()
     {
-        base.PlayAttackAnimation();
         if (monsterTarget != null)
         {
             Vector2 direction = (monsterTarget.transform.position - transform.position).normalized;
             LookAtDirection(direction);
             anim.SetFloat("DirX", direction.x);
             anim.SetFloat("DirY", direction.y);
+            anim.SetTrigger("Attack");
         }
+    }
+
+    public void PlayRunAnimation(bool active)
+    {
+        anim.SetBool("Run", active);
+    }
+
+    public void PlayIdleAnimation()
+    {
+        anim.SetTrigger("Idle");
     }
 
     public void FireArrow()

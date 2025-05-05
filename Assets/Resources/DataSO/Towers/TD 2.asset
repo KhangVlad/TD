@@ -10,21 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a25093400c434abba7b9bb5476784039, type: 3}
-  m_Name: Barracks
+  m_Name: TD 2
   m_EditorClassIdentifier: 
-  towerName: aaa
-  type: 4
+  towerName: 
+  id: 5
   level: 1
-  icon: {fileID: 21300000, guid: 87bf6e4d99fe742c18c9d68b9e82e0d8, type: 3}
-  prefab: {fileID: 8917171939831479407, guid: a6905fb6a5b9640eba40a051ab99d1cd, type: 3}
+  icon: {fileID: 0}
   buildCost: 50
   upgradeCost: 100
   sellValue: 25
-  range: 0
+  range: 5
   attackRate: 1
-  damage: 0
+  damage: 10
   maxUnits: 3
   spawnTime: 5
-  soldierPrefab: {fileID: 1179277266788537395, guid: 145f0d0feec4a42cd898e71e99d60783, type: 3}
-  soldierData: {fileID: 11400000, guid: 3701e453a31bc48f9bdb9adc8cd8b74b, type: 2}
-  possibleUpgrades: 0100000002000000
+  unitID: 2
+  possibleUpgrades: 

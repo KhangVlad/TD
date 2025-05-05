@@ -7,8 +7,9 @@ public interface ITower
 {
 
 }
-public abstract class Tower : MonoBehaviour, ITower
+public abstract class Tower : MonoBehaviour, ITower,FlagAreaTrigger.IFlagAreaListener
 {
+    public TowerID TowerID;
     public TowerSO dataSO;
     public Flag flagInstance;
     
@@ -20,12 +21,10 @@ public abstract class Tower : MonoBehaviour, ITower
     protected Coroutine flagCoroutine;
     protected FlagAreaTrigger _flagAreaCollider;
     
-    // Event for notifying flag position changes
     public event Action<Vector2> OnFlagPositionChanged;
 
     protected virtual void Update()
     {
-        // Base update logic
     }
     
     protected virtual void Start()
@@ -45,9 +44,7 @@ public abstract class Tower : MonoBehaviour, ITower
                 // Create flag instance
                 GameObject flagObject = Instantiate(flagPrefab, transform.position, Quaternion.identity);
                 flagInstance = flagObject.GetComponent<Flag>();
-                flagObject.SetActive(false); 
-                
-                // Create flag area collider
+                flagObject.SetActive(false);
                 InitializeFlagCollider();
             }
             else

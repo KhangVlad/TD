@@ -1,7 +1,7 @@
 
     using UnityEngine;
 
-    public class BuildSpot : MonoBehaviour
+    public class BuildSpot : Tower
     {
         
     }

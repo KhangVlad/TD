@@ -754,6 +754,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 312851487}
     m_Modifications:
+    - target: {fileID: 2737735473649922080, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
+      propertyPath: dataSO
+      value: 
+      objectReference: {fileID: 11400000, guid: 9bd03d7bbc8b4458a8d4d0ef91af8ec9, type: 2}
     - target: {fileID: 3710594250886748494, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.83333325
@@ -1777,6 +1781,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 312851487}
     m_Modifications:
+    - target: {fileID: 2737735473649922080, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
+      propertyPath: dataSO
+      value: 
+      objectReference: {fileID: 11400000, guid: 9bd03d7bbc8b4458a8d4d0ef91af8ec9, type: 2}
     - target: {fileID: 3710594250886748494, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.83333325
@@ -1872,10 +1880,8 @@ MonoBehaviour:
   monsterSOList: []
   levelDataList: []
   heroDataList: []
+  unitDataList: []
   currentResources: 100
-  onResourcesChanged:
-    m_PersistentCalls:
-      m_Calls: []
   currentLevelIndex: 0
   highestUnlockedLevel: 0
   loadDataOnStart: 1
@@ -2477,6 +2483,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 312851487}
     m_Modifications:
+    - target: {fileID: 2737735473649922080, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
+      propertyPath: dataSO
+      value: 
+      objectReference: {fileID: 11400000, guid: 9bd03d7bbc8b4458a8d4d0ef91af8ec9, type: 2}
     - target: {fileID: 3710594250886748494, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.83333325
@@ -2796,6 +2806,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 312851487}
     m_Modifications:
+    - target: {fileID: 2737735473649922080, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
+      propertyPath: dataSO
+      value: 
+      objectReference: {fileID: 11400000, guid: 9bd03d7bbc8b4458a8d4d0ef91af8ec9, type: 2}
     - target: {fileID: 3710594250886748494, guid: e7243fbbfaa29453cbecdedbbae6162b, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.83333325

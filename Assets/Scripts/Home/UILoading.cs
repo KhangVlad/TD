@@ -15,4 +15,10 @@
                 Loader.Load(Loader.Scene.Battle);
             }));
         }
+
+        private void OnDestroy()
+        {
+            play.onClick.RemoveAllListeners();
+        }
     }
+    

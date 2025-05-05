@@ -86,6 +86,7 @@ public class UnitDataImporter : EditorWindow
                 case "Hero":
                     HeroSO hero = CreateInstance<HeroSO>();
                     SetBaseUnitProperties(hero, unitData);
+                    hero.detectionRadius = unitData.detectionRadius;
                     SaveAsset(hero, unitData.unitName);
                     createdCount++;
                     break;
@@ -149,6 +150,10 @@ public class UnitData
     public float arrowLifetime;
     public float criticalHitChance;
     public float criticalHitMultiplier;
+    
+    //hero
+    public float detectionRadius;
 }
+
 
 // Hero specific properties can be added here if needed

@@ -1,18 +1,15 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-public class HeroBehavior : MonoBehaviour
+public class HeroBehavior : Unit, FlagAreaTrigger.IFlagAreaListener
 {
-    [Header("Direction")]
+    #region Fields
+    [Header("Direction")] 
     [SerializeField] private FacingDirection currentDirection = FacingDirection.None;
-    [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private Material mat;
-    public Animator animator;
-    public UnitID heroID;
-   public HeroSO heroData;
-    private Vector2 targetPosition;
-    private bool isMoving = false;
+    [SerializeField] private Material outlineMaterial;
+
+    #region Animation Hash IDs
     public readonly int MovingDown = Animator.StringToHash("Down");
     public readonly int MovingUp = Animator.StringToHash("Up");
     public readonly int MovingHorizon = Animator.StringToHash("Horizon");
@@ -20,62 +17,226 @@ public class HeroBehavior : MonoBehaviour
     public readonly int DieState = Animator.StringToHash("Die");
     public readonly int SkillTrigger = Animator.StringToHash("Skill");
     public readonly int IdleTrigger = Animator.StringToHash("Idle");
-    public HeroMovingState moveState;
+    #endregion
+
+    #region State Management
+    public HeroState state;
+    private IHeroState currentState;
+    public HeroMovingToFlagState moveFlagState;
     public HeroAttackState attackState;
     public HeroIdleState idleState;
-    private IHeroState currentState;
-    private void Awake()
+    public HeroMovingToMonsterState moveToMonsterState;
+    #endregion
+
+    #region Hero Properties
+    public Vector2 targetPosition;
+    private bool isMoving = false;
+    public bool hasFlagTarget = false;
+    #endregion
+
+    #region Enemy Detection
+    protected FlagAreaTrigger flagAreaDetector;
+    public List<MonsterBase> monstersInDetectionArea = new List<MonsterBase>();
+    public HeroSO heroData;
+    #endregion
+    #endregion
+
+    #region Unity Lifecycle
+    protected override void Awake()
     {
-        moveState = new HeroMovingState();
+        base.Awake();
+        InitializeStateObjects();
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+        ChangeState(HeroState.Idle);
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+    }
+    #endregion
+
+    #region Initialization
+    private void InitializeStateObjects()
+    {
+        moveFlagState = new HeroMovingToFlagState();
         attackState = new HeroAttackState();
         idleState = new HeroIdleState();
+        moveToMonsterState = new HeroMovingToMonsterState();
     }
 
-    private void Start()
+    public override void Initialize(UnitSO data)
     {
-        SetState(idleState);
-    }
+        base.Initialize(data);
 
-    private void Update()
-    {
-        if (currentState != null)
+        if (data is HeroSO heroSO)
         {
-            currentState.UpdateState(this);
+            heroData = heroSO;
+            id = heroSO.unitID;
+            InitializeFlagCollider();
         }
     }
-    public void Initialize(HeroSO data)
+
+    protected void InitializeFlagCollider()
     {
-        heroData = data;
-        heroID = data.unitID;
+        if (flagAreaDetector != null)
+        {
+            return;
+        }
+
+        var detectionObject = new GameObject("FlagAreaDetector");
+        detectionObject.transform.parent = transform;
+        detectionObject.transform.position = transform.position;
+
+        CircleCollider2D collider = detectionObject.AddComponent<CircleCollider2D>();
+        collider.radius = heroData.detectionRadius;
+        collider.isTrigger = true;
+
+        Rigidbody2D rb = detectionObject.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.simulated = true;
+
+        FlagAreaTrigger trigger = detectionObject.AddComponent<FlagAreaTrigger>();
+        flagAreaDetector = trigger;
+        flagAreaDetector.Initialize(this);
+    }
+    #endregion
+
+    #region State Management
+    public void ChangeState(HeroState newState)
+    {
+        if (state == newState && currentState != null)
+            return;
+
+        currentState?.ExitState(this);
+        state = newState;
+
+        switch (newState)
+        {
+            case HeroState.Idle:
+                currentState = idleState;
+                break;
+            case HeroState.MovingToMonster:
+                currentState = moveToMonsterState;
+                break;
+            case HeroState.MovingToFlag:
+                currentState = moveFlagState;
+                break;
+            case HeroState.Attack:
+                currentState = attackState;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
+        }
+
+        currentState.EnterState(this);
     }
 
-    public void SetState(IHeroState newState)
+    protected override void InitializeStateMachine()
     {
-        if (currentState != null)
+        ChangeState(HeroState.Idle);
+    }
+
+    protected override void UpdateStateMachine()
+    {
+        currentState?.UpdateState(this);
+    }
+    #endregion
+
+    #region IFlagAreaListener Implementation
+    public void AddMonsterToArea(MonsterBase monster)
+    {
+        if (!monstersInDetectionArea.Contains(monster))
         {
-            currentState.ExitState(this);
+            monstersInDetectionArea.Add(monster);
         }
 
-        currentState = newState;
-
-        if (currentState != null)
+        if (state == HeroState.Idle)
         {
-            currentState.EnterState(this);
+            ChangeTarget(monster);
+            ChangeState(HeroState.MovingToMonster);
         }
+    }
+
+    public void RemoveMonsterFromArea(MonsterBase monster)
+    {
+        if (monster != null)
+        {
+            monstersInDetectionArea.Remove(monster);
+        }
+
+        if (monster == monsterTarget)
+        {
+            monsterTarget = null;
+
+            if (state == HeroState.Attack || state == HeroState.MovingToMonster)
+            {
+                MonsterBase newTarget = FindClosestMonster();
+                if (newTarget != null)
+                {
+                    ChangeTarget(newTarget);
+                    ChangeState(HeroState.MovingToMonster);
+                }
+                else if (hasFlagTarget)
+                {
+                    ChangeState(HeroState.MovingToFlag);
+                }
+                else
+                {
+                    ChangeState(HeroState.Idle);
+                }
+            }
+        }
+    }
+    #endregion
+
+    #region Target Management
+    public MonsterBase FindClosestMonster()
+    {
+        if (monstersInDetectionArea.Count == 0) return null;
+
+        MonsterBase closest = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (var monster in monstersInDetectionArea)
+        {
+            if (monster == null) continue;
+
+            float distance = Vector2.Distance(transform.position, monster.transform.position);
+            if (distance < closestDistance)
+            {
+                closest = monster;
+                closestDistance = distance;
+            }
+        }
+
+        return closest;
+    }
+
+    protected override void HandleTargetChange(MonsterBase target)
+    {
+        if (target != null && state == HeroState.Idle)
+        {
+            ChangeState(HeroState.MovingToMonster);
+        }
+    }
+
+    protected override void CleanupMonsterTarget()
+    {
+        base.CleanupMonsterTarget();
     }
 
     public void SetTargetPosition(Vector2 position)
     {
         targetPosition = position;
         isMoving = true;
-        Vector2 direction = new Vector2(
-            targetPosition.x - transform.position.x,
-            targetPosition.y - transform.position.y
-        ).normalized;
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        angle -= 90f;
-        if (angle > 180f) angle -= 360f;
-        if (angle < -180f) angle += 360f;
+        hasFlagTarget = true;
+        
+        Vector2 direction = (targetPosition - (Vector2)transform.position).normalized;
         if (direction.x < 0)
         {
             transform.localScale = new Vector3(-1, 1, 1);
@@ -93,146 +254,75 @@ public class HeroBehavior : MonoBehaviour
                 currentDirection = FacingDirection.Right;
             }
         }
-        mat.SetFloat("_OutlineEnabled", 0);
+        float angle = CalculateDirectionAngle(direction);
+        outlineMaterial.SetFloat("_OutlineEnabled", 0);
         UpdateAnimationDirectionFromAngle(angle);
+        ChangeState(HeroState.MovingToFlag);
+    }
+    #endregion
+
+    #region Animation
+    private float CalculateDirectionAngle(Vector2 direction)
+    {
+       
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        angle -= 90f;
+        if (angle > 180f) angle -= 360f;
+        if (angle < -180f) angle += 360f;
+        return angle;
     }
 
-    public void MoveTowardsTarget()
+    public void UpdateAnimationDirectionFromAngle(float angle)
     {
-        if (!isMoving) return;
-        transform.position = Vector2.MoveTowards(
-            transform.position,
-            targetPosition,
-            moveSpeed * Time.deltaTime
-        );
-        // Check if we've reached the destination
-        if (Vector2.Distance(transform.position, targetPosition) < 0.1f)
+        ResetMovementTriggers();
+        
+        if (angle >= -60f && angle <= 60f)
         {
-            isMoving = false;
-            SetState(idleState);
+            anim.SetTrigger(MovingUp);
+            currentDirection = FacingDirection.Up;
+        }
+        else if ((angle > 60f && angle <= 150f) || (angle < -60f && angle >= -150f))
+        {
+            anim.SetTrigger(MovingHorizon);
+            currentDirection = transform.localScale.x < 0 ? FacingDirection.Left : FacingDirection.Right;
+        }
+        else
+        {
+            anim.SetTrigger(MovingDown);
+            currentDirection = FacingDirection.Down;
         }
     }
 
-    protected void UpdateAnimationDirectionFromAngle(float angle)
+    private void ResetMovementTriggers()
     {
-        if (animator == null || !animator.runtimeAnimatorController)
-        {
-            Debug.LogWarning("Animator missing or has no controller assigned");
-            return;
-        }
-
-        try
-        {
-            animator.ResetTrigger(MovingUp);
-            animator.ResetTrigger(MovingDown);
-            animator.ResetTrigger(MovingHorizon);
-            if (angle >= -60f && angle <= 60f)
-            {
-                // Up direction
-                animator.SetTrigger(MovingUp);
-                currentDirection = FacingDirection.Up;
-            }
-            else if ((angle > 60f && angle < 150f) || (angle < -60f && angle > -150f))
-            {
-                animator.SetTrigger(MovingHorizon);
-                if (transform.localScale.x < 0)
-                {
-                    currentDirection = FacingDirection.Left;
-                }
-                else
-                {
-                    currentDirection = FacingDirection.Right;
-                }
-            }
-            else
-            {
-                animator.SetTrigger(MovingDown);
-                currentDirection = FacingDirection.Down;
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"Error setting animation trigger: {e.Message}");
-        }
+        anim.ResetTrigger(MovingUp);
+        anim.ResetTrigger(MovingDown);
+        anim.ResetTrigger(MovingHorizon);
     }
 
-    public void ListenClickEvent()
+    public void PlayAttackAnimation()
     {
-        mat.SetFloat("_OutlineEnabled", 1);
-    }
-}
-
-public interface IHeroState
-{
-    void EnterState(HeroBehavior soldier);
-    void UpdateState(HeroBehavior soldier);
-    void ExitState(HeroBehavior soldier);
-}
-
-public class HeroMovingState : IHeroState
-{
-    public void EnterState(HeroBehavior h)
-    {
-        // Start movement animation
-        if (h.animator != null)
-        {
-            h.animator.SetBool("IsMoving", true);
-        }
+        anim.SetTrigger(AttackTrigger);
     }
 
-    public void UpdateState(HeroBehavior h)
+    public void PlayIdleAnimation()
     {
-        // Move towards target
-        h.MoveTowardsTarget();
+        anim.SetTrigger(IdleTrigger);
     }
+    #endregion
 
-    public void ExitState(HeroBehavior h)
+    #region UI Interaction
+    public void OnSelected()
     {
-        // Stop movement animation
-        if (h.animator != null)
-        {
-            h.animator.SetBool("IsMoving", false);
-        }
+        outlineMaterial.SetFloat("_OutlineEnabled", 1);
     }
-}
+    #endregion
 
-public class HeroAttackState : IHeroState
-{
-    public void EnterState(HeroBehavior h)
+    #region Combat
+    public bool IsInAttackRange(MonsterBase target)
     {
-        // Start attack animation
-        if (h.animator != null)
-        {
-            h.animator.SetTrigger("Attack");
-        }
+        if (target == null) return false;
+        return Vector2.Distance(transform.position, target.transform.position) <= attackRange;
     }
-
-    public void UpdateState(HeroBehavior h)
-    {
-        // Handle attack logic
-        // When attack animation is complete, you might want to return to idle state
-    }
-
-    public void ExitState(HeroBehavior h)
-    {
-        // Reset any attack-related variables
-    }
-}
-
-public class HeroIdleState : IHeroState
-{
-    public void EnterState(HeroBehavior h)
-    {
-        h.animator.SetTrigger(h.IdleTrigger);
-    }
-
-    public void UpdateState(HeroBehavior h)
-    {
-        // Nothing much to do in idle state except wait for next command
-    }
-
-    public void ExitState(HeroBehavior h)
-    {
-        // Nothing specific to clean up
-    }
+    #endregion
 }

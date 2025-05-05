@@ -72,7 +72,6 @@ public class MovingFlagState : ISoldierState
 
     public void EnterState(Soldier soldier)
     {
-        Debug.Log("AABABABHAH");
         soldier.PlayRunAnimation(true);
         soldier.LookAtTarget(soldier.flagPos);
     }

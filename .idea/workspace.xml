@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="24f14187-2149-4d92-a64d-be9031f4969e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIGamePlayManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIGamePlayManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +24,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/KhangVlad/TD.git&quot;,
-    &quot;accountId&quot;: &quot;bcc2090b-e986-4cc3-bb7f-85ef994678ac&quot;
+    &quot;accountId&quot;: &quot;5280bde3-87ec-4d2e-9eae-30ed8491e91f&quot;
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
@@ -71,6 +68,8 @@
       <workItem from="1744471856849" duration="736000" />
       <workItem from="1744472617784" duration="539000" />
       <workItem from="1744473199488" duration="27000" />
+      <workItem from="1746412221953" duration="222000" />
+      <workItem from="1746412454804" duration="2000" />
     </task>
     <servers />
   </component>

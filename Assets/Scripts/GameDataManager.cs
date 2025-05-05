@@ -31,8 +31,8 @@ public class GameDataManager : MonoBehaviour
     [SerializeField] private List<MonsterSO> monsterSOList = new List<MonsterSO>();
     [SerializeField] private List<LevelDataSO> levelDataList = new List<LevelDataSO>();
     [SerializeField] private List<HeroSO> heroDataList = new();
+    [SerializeField] private List<UnitSO> unitDataList = new();
     [Header("Economy")] [SerializeField] private int currentResources = 100;
-    public UnityEvent<int> onResourcesChanged;
 
     [Header("Game Progress")] [SerializeField]
     private int currentLevelIndex = 0;
@@ -58,10 +58,9 @@ public class GameDataManager : MonoBehaviour
     {
         towerSOList = Resources.LoadAll<TowerSO>("DataSO/Towers").ToList();
         monsterSOList = Resources.LoadAll<MonsterSO>("DataSO/Monsters").ToList();
-
         levelDataList = Resources.LoadAll<LevelDataSO>("DataSO/Levels").ToList();
-
         heroDataList = Resources.LoadAll<HeroSO>("DataSO/Units").ToList();
+        unitDataList=Resources.LoadAll<UnitSO>("DataSO/Units").ToList();
     }
 
     public HeroSO GetHeroData(UnitID heroId)
@@ -72,6 +71,20 @@ public class GameDataManager : MonoBehaviour
             if (heroDataList[i].unitID == heroId)
             {
                 data = heroDataList[i];
+            }
+        }
+
+        return data;
+    }
+
+    public UnitSO GetUnitDataSO(UnitID id)
+    {
+        UnitSO data = null;
+        for (int i = 0; i < unitDataList.Count; i++)
+        {
+            if (unitDataList[i].unitID == id)
+            {
+                data = unitDataList[i];
             }
         }
 
@@ -142,7 +155,7 @@ public class GameDataManager : MonoBehaviour
         {
             foreach (TowerSO towerSO in towerSOList)
             {
-                if (towerSO.type == tow.possibleUpgrades[i])
+                if (towerSO.id == tow.possibleUpgrades[i])
                 {
                     possibleUpgrades.Add(towerSO);
                 }
@@ -172,15 +185,15 @@ public class GameDataManager : MonoBehaviour
     /// <summary>
     /// Gets a tower by its type
     /// </summary>
-    public TowerSO GetTowerByType(TowerType type)
+    public TowerSO GetTowerByType(TowerID id)
     {
         foreach (TowerSO tower in towerSOList)
         {
-            if (tower.type == type)
+            if (tower.id == id)
                 return tower;
         }
 
-        Debug.LogWarning($"Tower type {type} not found in GameDataManager!");
+        Debug.LogWarning($"Tower type {id} not found in GameDataManager!");
         return null;
     }
 
@@ -245,58 +258,6 @@ public class GameDataManager : MonoBehaviour
 
     #endregion
 
-    #region Economy
-
-    /// <summary>
-    /// Checks if player can afford a cost
-    /// </summary>
-    public bool CanAfford(float cost)
-    {
-        return currentResources >= cost;
-    }
-
-    /// <summary>
-    /// Attempts to spend resources
-    /// </summary>
-    public bool SpendResources(int amount)
-    {
-        if (currentResources >= amount)
-        {
-            currentResources -= amount;
-            onResourcesChanged?.Invoke(currentResources);
-            return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Adds resources to the player's total
-    /// </summary>
-    public void AddResources(int amount)
-    {
-        currentResources += amount;
-        onResourcesChanged?.Invoke(currentResources);
-    }
-
-    /// <summary>
-    /// Sets the current resource amount
-    /// </summary>
-    public void SetCurrentResources(int amount)
-    {
-        currentResources = Mathf.Max(0, amount);
-        onResourcesChanged?.Invoke(currentResources);
-    }
-
-    /// <summary>
-    /// Gets the current resource amount
-    /// </summary>
-    public int GetCurrentResources()
-    {
-        return currentResources;
-    }
-
-    #endregion
 
     #region Save/Load Game State
 

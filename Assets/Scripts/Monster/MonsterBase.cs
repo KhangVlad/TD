@@ -40,7 +40,6 @@ public abstract class MonsterBase : MonoBehaviour
     [Header("Direction")]
     [SerializeField] public FacingDirection currentDirection = FacingDirection.None;
     public Unit targetSoldier;
-    
    
     public Vector2 facingDirection;
 

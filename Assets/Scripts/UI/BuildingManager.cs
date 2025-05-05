@@ -534,11 +534,11 @@ public class BuildingManager : MonoBehaviour
             ClearSelection();
             return;
         }
-
-        if (hit.collider.TryGetComponent<BuildSpot>(out BuildSpot buildingSpot))
-        {
-            SelectBuildingSpot(buildingSpot);
-        }
+        //
+        // if (hit.collider.TryGetComponent<BuildSpot>(out BuildSpot buildingSpot))
+        // {
+        //     SelectBuildingSpot(buildingSpot);
+        // }
         else if (hit.collider.TryGetComponent<Tower>(out Tower tower))
         {
             SelectTower(tower);
@@ -695,26 +695,11 @@ public class BuildingManager : MonoBehaviour
 
     private void BuildTower(TowerSO towerData, Vector2 position, GameObject objectToReplace)
     {
-        if (towerData == null || towerData.prefab == null)
-        {
-            Debug.LogError("Cannot build tower: tower data or prefab is null.");
-            return;
-        }
-
-        if (GameDataManager.Instance == null || !GameDataManager.Instance.CanAfford(towerData.buildCost))
-        {
-            Debug.Log($"Not enough resources to build {towerData.towerName}.");
-            return;
-        }
-
-        GameObject towerObj = Instantiate(towerData.prefab, position, Quaternion.identity);
+        Tower towerObj = GameObjectFactory.CreateTowerGameObject(towerData.id, position);
         Tower tower = towerObj.GetComponent<Tower>();
-        
         if (tower != null)
         {
             tower.dataSO = towerData;
-
-            // Initialize specific tower types
             if (tower is Barracks barracks)
             {
                 barracks.InitializeTower(towerData);

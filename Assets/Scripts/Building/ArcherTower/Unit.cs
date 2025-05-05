@@ -5,9 +5,9 @@ using UnityEngine;
 public abstract class Unit : MonoBehaviour
 {
     [Header("Components")]
-    [SerializeField] protected Animator anim;
+     public Animator anim;
     [SerializeField] protected SpriteRenderer unitSprite;
-
+    public UnitID id;
     [Header("Data and Stats")]
     public UnitSO unitSO;
 
@@ -25,6 +25,11 @@ public abstract class Unit : MonoBehaviour
     {
         _healthBar = UIHealthBarManager.Instance?.CreateHealthBarForTarget(transform);
         InitializeStateMachine();
+    }
+
+    protected virtual void Awake()
+    {
+        
     }
 
     protected virtual void OnDestroy()
@@ -69,7 +74,7 @@ public abstract class Unit : MonoBehaviour
 
     protected virtual void CleanupMonsterTarget()
     {
-       
+         monsterTarget.SetSoldierTarget(null);
     }
 
     public virtual void LookAtDirection(Vector2 direction)
@@ -92,25 +97,5 @@ public abstract class Unit : MonoBehaviour
     }
     protected abstract void InitializeStateMachine();
     protected abstract void UpdateStateMachine();
-
-    #region Animation Controller
-
-    public virtual void PlayAttackAnimation()
-    {
-        anim.SetTrigger("Attack");
-      
-    }
-
-    public virtual void PlayRunAnimation(bool active)
-    {
-        anim.SetBool("Run", active);
-    }
-    
-    public virtual void PlayIdleAnimation()
-    {
-        anim.SetTrigger("Idle");
-    }
-
-    #endregion
 }
 

@@ -51,8 +51,7 @@ public class WaveUI : MonoBehaviour
         
         if (GameDataManager.Instance != null)
         {
-            GameDataManager.Instance.onResourcesChanged.AddListener(UpdateResourcesText);
-            UpdateResourcesText(GameDataManager.Instance.GetCurrentResources());
+          
         }
         
         // Set up button
@@ -84,7 +83,7 @@ public class WaveUI : MonoBehaviour
         
         if (GameDataManager.Instance != null)
         {
-            GameDataManager.Instance.onResourcesChanged.RemoveListener(UpdateResourcesText);
+            
         }
         
         if (startWaveButton != null)

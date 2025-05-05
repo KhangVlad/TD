@@ -1,4 +1,4 @@
-public enum TowerType
+public enum TowerID
 {
     None = 0, 
     Barracks = 1,

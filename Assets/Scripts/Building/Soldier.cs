@@ -75,7 +75,6 @@ public class Soldier : Unit
 
     protected override void InitializeStateMachine()
     {
-        // Initial state
         ChangeState(SoldierState.MovingFlag);
     }
 
@@ -119,10 +118,22 @@ public class Soldier : Unit
         ChangeState(SoldierState.MovingFlag);
     }
     
-    public override void PlayAttackAnimation()
+    public  void PlayAttackAnimation()  
     {
         anim.SetFloat("Blend", UnityEngine.Random.Range(0f, 1f));
-        base.PlayAttackAnimation();
+        anim.SetTrigger("Attack");
+    }
+    
+
+
+    public  void PlayRunAnimation(bool active)
+    {
+        anim.SetBool("Run", active);
+    }
+    
+    public  void PlayIdleAnimation()
+    {
+        anim.SetTrigger("Idle");
     }
 }
 
